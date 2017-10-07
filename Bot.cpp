@@ -372,7 +372,7 @@ void Bot::ProcessTurnInfo()
 
 	assert(mpBotLogic != nullptr && "mpBotLogic cannot be null at this point. Forgot to assign a botlogic in Main.cpp? ");
 
-	if (mpCurrentTurnInfo == NULL)
+	if (mpCurrentTurnInfo != NULL)
 	{
 		delete mpCurrentTurnInfo;
 		mpCurrentTurnInfo = NULL;

@@ -2,8 +2,6 @@
 
 #include "BotLogicIF.h"
 #include "Logger.h"
-#include "Graph.h"
-#include "Agent.h"
 
 #ifdef _DEBUG
    #define BOT_LOGIC_DEBUG
@@ -32,18 +30,5 @@ public:
 
 protected:
 	Logger mLogger;
-
-private:
-	Graph graph;
-	vector<Agent *> agents;
-	bool isFirst = true;
-
-public:
-	vector<Agent *> * getAgents() {
-		return &agents;
-	}
-	Graph * getGraph() {
-		return &graph;
-	}
 };
 
