@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Globals.h"
+#include "TileInfo.h"
 #include "Connector.h"
 #include <vector>
 
@@ -8,41 +8,35 @@ using namespace std;
 
 class Node
 {
+public:
+	using value_type = int;
 private:
-	int id;
-	int x;
-	int y;
-	//autre syteme de coordonnees base sur http://www-cs-students.stanford.edu/~amitp/Articles/Hexagon2.html (simplifie les calculs de distance)
-	int cX;
-	int cY;
-	int cZ;
+	//Coordonnée XY
+	value_type x;
+	value_type y;
+
+	value_type id;
 	Tile::ETileType type;
-	vector<Connector *> connectors;
+	vector<Connector*> connectors;
 	
 public:
-	Node(unsigned int id, unsigned int x, unsigned int y, Tile::ETileType type);
-	int getId() {
-		return id;
-	}
-	int getX() {
+	Node(const TileInfo&, int colCount) noexcept;
+	~Node();
+
+	value_type getX() const noexcept {
 		return x;
 	}
-	int getY() {
+	value_type getY() const noexcept {
 		return y;
 	}
-	int getCX() {
-		return cX;
+
+	value_type getId() const noexcept {
+		return id;
 	}
-	int getCY() {
-		return cY;
-	}
-	int getCZ() {
-		return cZ;
-	}
-	Tile::ETileType getType() {
+	Tile::ETileType getType() const noexcept {
 		return type;
 	}
-	vector<Connector *> getConnectors() {
+	const vector<Connector *> getConnectors() const noexcept {
 		return connectors;
 	}
 	void addConnector(Tile::ETilePosition dir, Node * obj);

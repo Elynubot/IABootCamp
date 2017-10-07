@@ -1,18 +1,25 @@
 #include "Node.h"
+#include <algorithm>
 
-Node::Node(unsigned int givenId, unsigned int givenX, unsigned int givenY, Tile::ETileType givenType)
+Node::Node(const TileInfo& tileInfo, int colCount) noexcept
+	: x{ tileInfo.tileID % colCount }
+	, y{ tileInfo.tileID / colCount }
+	, id{ tileInfo.tileID }
+	, type{ tileInfo.tileType }
+	, connectors{}
 {
-	id = givenId;
-	x = givenX;
-	y = givenY;
-	type = givenType;
-	cX = x - floor((1.0*y) / 2.0);
-	cY = y;
-	cZ = -x - ceil((1.0*y) / 2.0);
+}
+
+Node::~Node() {
+	//Free memory
+	std::for_each(connectors.begin(), connectors.end(), [](Connector * connector) { 
+		delete(connector); 
+	});
 }
 
 void Node::addConnector(Tile::ETilePosition dir, Node * obj)
 {
+	//Allocate memory
 	if (obj->getType() != Tile::TileAttribute_Forbidden) {
 		connectors.push_back(new Connector(this, obj, dir));
 	}
