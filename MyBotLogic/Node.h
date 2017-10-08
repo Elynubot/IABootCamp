@@ -11,34 +11,40 @@ class Node
 public:
 	using value_type = int;
 private:
-	//Coordonnée XY
+	//XY Coordinates
 	value_type x;
 	value_type y;
 
 	value_type id;
 	Tile::ETileType type;
-	vector<Connector*> connectors;
+	vector<Connector*> connectors; //Only connectors without any forbidden type on both end are stored
 	
 public:
 	Node(const TileInfo&, int colCount) noexcept;
 	~Node();
 
-	value_type getX() const noexcept {
+	void UpdateNode(const TileInfo&) noexcept;
+
+	value_type GetX() const noexcept {
 		return x;
 	}
-	value_type getY() const noexcept {
+	value_type GetY() const noexcept {
 		return y;
 	}
 
-	value_type getId() const noexcept {
+	value_type GetId() const noexcept {
 		return id;
 	}
-	Tile::ETileType getType() const noexcept {
+	Tile::ETileType GetType() const noexcept {
 		return type;
 	}
-	const vector<Connector *> getConnectors() const noexcept {
+	void SetType(Tile::ETileType _type) noexcept {
+		type = _type;
+	}
+
+	const vector<Connector *> GetConnectors() const noexcept {
 		return connectors;
 	}
-	void addConnector(Tile::ETilePosition dir, Node * obj);
+	void AddConnector(Tile::ETilePosition dir, Node * obj);
 };
 

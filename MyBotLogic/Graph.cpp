@@ -1,8 +1,93 @@
 #include "Graph.h"
-#include "Globals.h"
+// ? 
 #include "ComputeNode.h"
-
+// END ?
 #include <algorithm>
+
+Graph::Graph() noexcept 
+	: rowCount{}
+	, colCount{}
+	, nodes{}
+{
+}
+
+Graph::~Graph() {
+	//TO DO
+}
+
+//Create the nodes without their connectors with the Node constructor
+void Graph::CreateNodes(const map<unsigned int, TileInfo>& tiles) {
+	nodes.resize(tiles.size());
+	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
+		nodes[tile.second.tileID] = new Node(tile.second, colCount);
+	});
+}
+
+void Graph::UpdateNodes(const map<unsigned int, TileInfo>& tiles) noexcept {
+	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
+		nodes[tile.second.tileID]->UpdateNode(tile.second);
+	});
+}
+
+//Create the connectors for each accessible neighbours for each node
+void Graph::CreateConnectors(const map<unsigned int, TileInfo>& tiles) {
+	for_each(nodes.begin(), nodes.end(), [&](Node* node) {
+		int x{ node->GetX() };
+		int y{ node->GetY() };
+		if (y % 2 == 0) {
+			//case EVEN ROW
+			if (x != 0) {
+				node->AddConnector(Tile::W, nodes[GetPositionId(x - 1, y - 0)]);
+			}
+			if (x != colCount - 1) {
+				node->AddConnector(Tile::E, nodes[GetPositionId(x + 1, y)]);
+			}
+			if ((x != 0) && (y != 0)) {
+				node->AddConnector(Tile::NW, nodes[GetPositionId(x - 1, y - 1)]);
+			}
+			if ((x != 0) && (y != rowCount - 1)) {
+				node->AddConnector(Tile::SW, nodes[GetPositionId(x - 1, y + 1)]);
+			}
+			if (y != 0) {
+				node->AddConnector(Tile::NE, nodes[GetPositionId(x, y - 1)]);
+			}
+			if (y != rowCount - 1) {
+				node->AddConnector(Tile::SE, nodes[GetPositionId(x, y + 1)]);
+			}
+		}
+		else {
+			//case ODD ROW
+			if (x != 0) {
+				node->AddConnector(Tile::W, nodes[GetPositionId(x - 1, y - 0)]);
+			}
+			if (x != colCount - 1) {
+				node->AddConnector(Tile::E, nodes[GetPositionId(x + 1, y)]);
+			}
+
+			node->AddConnector(Tile::NW, nodes[GetPositionId(x, y - 1)]);
+
+			if (y != rowCount - 1) {
+				node->AddConnector(Tile::SW, nodes[GetPositionId(x, y + 1)]);
+			}
+			if (x != colCount - 1) {
+				node->AddConnector(Tile::NE, nodes[GetPositionId(x + 1, y - 1)]);
+			}
+			if ((x != colCount - 1) && (y != rowCount - 1)) {
+				node->AddConnector(Tile::SE, nodes[GetPositionId(x + 1, y + 1)]);
+			}
+		}
+	});
+}
+
+void Graph::Init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles) {
+	rowCount = _rowCount;
+	colCount = _colCount;
+	CreateNodes(tiles);
+	CreateConnectors(tiles);
+}
+
+
+//TO DO
 
 vector<Connector *> Graph::getPath(int begin, int end)
 {

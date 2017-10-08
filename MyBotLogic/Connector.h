@@ -10,13 +10,13 @@ private:
 	Tile::ETilePosition direction;
 public:
 	Connector(Node * begin, Node * end, Tile::ETilePosition direction);
-	const Node * getBeginNode() const noexcept {
+	const Node * GetBeginNode() const noexcept {
 		return beginNode;
 	}
-	const Node * getEndNode() const noexcept {
+	const Node * GetEndNode() const noexcept {
 		return endNode;
 	}
-	Tile::ETilePosition getDirection() const noexcept {
+	Tile::ETilePosition GetDirection() const noexcept {
 		return direction;
 	}
 };

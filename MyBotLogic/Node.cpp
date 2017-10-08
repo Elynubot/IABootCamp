@@ -10,6 +10,10 @@ Node::Node(const TileInfo& tileInfo, int colCount) noexcept
 {
 }
 
+void Node::UpdateNode(const TileInfo& tileInfo) noexcept {
+	type = tileInfo.tileType;
+}
+
 Node::~Node() {
 	//Free memory
 	std::for_each(connectors.begin(), connectors.end(), [](Connector * connector) { 
@@ -17,10 +21,7 @@ Node::~Node() {
 	});
 }
 
-void Node::addConnector(Tile::ETilePosition dir, Node * obj)
-{
+void Node::AddConnector(Tile::ETilePosition dir, Node * obj) {
 	//Allocate memory
-	if (obj->getType() != Tile::TileAttribute_Forbidden) {
-		connectors.push_back(new Connector(this, obj, dir));
-	}
+	connectors.push_back(new Connector(this, obj, dir));
 }
