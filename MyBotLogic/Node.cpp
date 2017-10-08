@@ -2,26 +2,30 @@
 #include <algorithm>
 
 Node::Node(const TileInfo& tileInfo, int colCount) noexcept
-	: x{ tileInfo.tileID % colCount }
+	: x{}
 	, y{ tileInfo.tileID / colCount }
 	, id{ tileInfo.tileID }
 	, type{ tileInfo.tileType }
 	, connectors{}
 {
-}
-
-void Node::UpdateNode(const TileInfo& tileInfo) noexcept {
-	type = tileInfo.tileType;
-}
-
-Node::~Node() {
-	//Free memory
-	std::for_each(connectors.begin(), connectors.end(), [](Connector * connector) { 
-		delete(connector); 
-	});
+	x = 2*(tileInfo.tileID % colCount) + y % 2;
 }
 
 void Node::AddConnector(Tile::ETilePosition dir, Node * obj) {
-	//Allocate memory
-	connectors.push_back(new Connector(this, obj, dir));
+	//Add target obj in connector
+	if ((obj->GetType() != Tile::TileAttribute_Forbidden)&&(GetType() != Tile::TileAttribute_Forbidden)) {
+		connectors.push_back(Connector(this, obj, dir));
+	}
+}
+
+void Node::PopConnector(Node * obj) {
+	//Pop target obj in connectors
+	int i{};
+	while (i < connectors.size()) {
+		if (connectors[i].cGetEndNode == obj) {
+			connectors.erase(connectors.begin() + i);
+			break;
+		}
+		++i;
+	}
 }

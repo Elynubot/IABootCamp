@@ -17,13 +17,10 @@ private:
 
 	value_type id;
 	Tile::ETileType type;
-	vector<Connector*> connectors; //Only connectors without any forbidden type on both end are stored
+	vector<Connector> connectors; //Only connectors without any forbidden type on both end are stored
 	
 public:
-	Node(const TileInfo&, int colCount) noexcept;
-	~Node();
-
-	void UpdateNode(const TileInfo&) noexcept;
+	Node(const TileInfo& tileInfo, int colCount) noexcept;
 
 	value_type GetX() const noexcept {
 		return x;
@@ -35,6 +32,7 @@ public:
 	value_type GetId() const noexcept {
 		return id;
 	}
+
 	Tile::ETileType GetType() const noexcept {
 		return type;
 	}
@@ -42,9 +40,14 @@ public:
 		type = _type;
 	}
 
-	const vector<Connector *> GetConnectors() const noexcept {
-		return connectors;
+	const vector<Connector>* GetConnectors() const noexcept {
+		return &connectors;
 	}
+	void ClearConnectors() noexcept {
+		connectors.clear();
+	}
+
 	void AddConnector(Tile::ETilePosition dir, Node * obj);
+	void PopConnector(Node * obj);
 };
 

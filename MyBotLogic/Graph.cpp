@@ -4,80 +4,73 @@
 // END ?
 #include <algorithm>
 
-Graph::Graph() noexcept 
-	: rowCount{}
-	, colCount{}
-	, nodes{}
-{
+int Graph::GetPositionId(int x, int y) const noexcept {
+	if ((x >= 0) && (x < colCount) && (y >= 0) && (y < rowCount))
+		return x / 2 + colCount * y;
+	return -1;
 }
 
-Graph::~Graph() {
-	//TO DO
+void Graph::TryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) noexcept {
+	if (int i = GetPositionId(x, y); i != -1) {
+		node.AddConnector(dir, &nodes[i]);
+	}
 }
+
 
 //Create the nodes without their connectors with the Node constructor
-void Graph::CreateNodes(const map<unsigned int, TileInfo>& tiles) {
+void Graph::CreateNodes(const map<unsigned int, TileInfo>& tiles) noexcept {
 	nodes.resize(tiles.size());
 	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
-		nodes[tile.second.tileID] = new Node(tile.second, colCount);
-	});
-}
-
-void Graph::UpdateNodes(const map<unsigned int, TileInfo>& tiles) noexcept {
-	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
-		nodes[tile.second.tileID]->UpdateNode(tile.second);
+		nodes[tile.second.tileID] = Node(tile.second, colCount);
 	});
 }
 
 //Create the connectors for each accessible neighbours for each node
-void Graph::CreateConnectors(const map<unsigned int, TileInfo>& tiles) {
-	for_each(nodes.begin(), nodes.end(), [&](Node* node) {
-		int x{ node->GetX() };
-		int y{ node->GetY() };
-		if (y % 2 == 0) {
-			//case EVEN ROW
-			if (x != 0) {
-				node->AddConnector(Tile::W, nodes[GetPositionId(x - 1, y - 0)]);
-			}
-			if (x != colCount - 1) {
-				node->AddConnector(Tile::E, nodes[GetPositionId(x + 1, y)]);
-			}
-			if ((x != 0) && (y != 0)) {
-				node->AddConnector(Tile::NW, nodes[GetPositionId(x - 1, y - 1)]);
-			}
-			if ((x != 0) && (y != rowCount - 1)) {
-				node->AddConnector(Tile::SW, nodes[GetPositionId(x - 1, y + 1)]);
-			}
-			if (y != 0) {
-				node->AddConnector(Tile::NE, nodes[GetPositionId(x, y - 1)]);
-			}
-			if (y != rowCount - 1) {
-				node->AddConnector(Tile::SE, nodes[GetPositionId(x, y + 1)]);
-			}
-		}
-		else {
-			//case ODD ROW
-			if (x != 0) {
-				node->AddConnector(Tile::W, nodes[GetPositionId(x - 1, y - 0)]);
-			}
-			if (x != colCount - 1) {
-				node->AddConnector(Tile::E, nodes[GetPositionId(x + 1, y)]);
-			}
-
-			node->AddConnector(Tile::NW, nodes[GetPositionId(x, y - 1)]);
-
-			if (y != rowCount - 1) {
-				node->AddConnector(Tile::SW, nodes[GetPositionId(x, y + 1)]);
-			}
-			if (x != colCount - 1) {
-				node->AddConnector(Tile::NE, nodes[GetPositionId(x + 1, y - 1)]);
-			}
-			if ((x != colCount - 1) && (y != rowCount - 1)) {
-				node->AddConnector(Tile::SE, nodes[GetPositionId(x + 1, y + 1)]);
-			}
-		}
+void Graph::CreateConnectors(const map<unsigned int, TileInfo>& tiles) noexcept {
+	for_each(nodes.begin(), nodes.end(), [&](Node& node) {
+		int x{ node.GetX() };
+		int y{ node.GetY() };
+		TryAddConnector(node, Tile::NW, x - 1, y - 1);
+		TryAddConnector(node, Tile::NE, x + 1, y - 1);
+		TryAddConnector(node, Tile::W, x - 2, y);
+		TryAddConnector(node, Tile::E, x + 2, y);
+		TryAddConnector(node, Tile::SW, x - 1, y + 1);
+		TryAddConnector(node, Tile::SE, x + 1, y + 1);
 	});
 }
+
+void Graph::Update(const map<unsigned int, TileInfo>& tiles) noexcept {
+	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
+		Node& node = nodes[tile.second.tileID];
+		if ((node.GetType() == Tile::TileAttribute_Forbidden) && (tile.second.tileType != Tile::TileAttribute_Forbidden)) {
+			int x{ node.GetX() };
+			int y{ node.GetY() };
+			//Create new connectors for the node
+			TryAddConnector(node, Tile::NW, x - 1, y - 1);
+			TryAddConnector(node, Tile::NE, x + 1, y - 1);
+			TryAddConnector(node, Tile::W, x - 2, y);
+			TryAddConnector(node, Tile::E, x + 2, y);
+			TryAddConnector(node, Tile::SW, x - 1, y + 1);
+			TryAddConnector(node, Tile::SE, x + 1, y + 1);
+			//Create new connectors for the neighbours of the node
+			const vector<Connector>* connectors{ node.GetConnectors() };
+			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
+				connector.GetEndNode()->AddConnector(connector.GetInvertDirection(), connector.GetBeginNode());
+			});
+		}
+		else if ((node.GetType() != Tile::TileAttribute_Forbidden) && (tile.second.tileType == Tile::TileAttribute_Forbidden)) {
+			//Pop old connectors for the neighbours of the node
+			const vector<Connector>* connectors{ node.GetConnectors() };
+			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
+				connector.GetEndNode()->PopConnector(connector.GetBeginNode());
+			});
+			//Clear connectors for the node
+			node.ClearConnectors();
+		}
+		node.SetType(tile.second.tileType);
+	});
+}
+
 
 void Graph::Init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles) {
 	rowCount = _rowCount;
@@ -88,6 +81,73 @@ void Graph::Init(int _rowCount, int _colCount, const std::map<unsigned int, Tile
 
 
 //TO DO
+vector<Connector *> Graph::getPath(int begin, int end)
+{
+	Node * goal = nodes[end];
+	float size = nodes.size()*1.0;
+	auto comp = [size](ComputeNode * a, ComputeNode * b) {return a->getEstim() + (a->getNode()->getId() / size) < b->getEstim() + (b->getNode()->getId() / size); };
+	vector<ComputeNode *> cNodes;
+	set < ComputeNode *, decltype(comp) > searching = set<ComputeNode *, decltype(comp)>(comp);
+	set <ComputeNode *> done;
+	for each (Node * node in nodes)
+	{
+		cNodes.push_back(new ComputeNode(node, goal));
+	}
+	ComputeNode * start = cNodes[begin];
+	start->setCout(0);
+	searching.insert(cNodes[begin]);
+	bool found = false;
+	while (!found && searching.size() > 0) {
+		ComputeNode * curr = *(searching.begin());
+		if (curr->getEntry() != nullptr) {
+			cNodes[curr->getEntry()->beginNode->getId()]->setExit(curr->getEntry());
+		}
+		if (curr->getNode()->getId() == end) {
+			found = true;
+		}
+		else {
+			searching.erase(curr);
+			done.insert(curr);
+			for each (Connector  * con in curr->getNode()->getConnectors())
+			{
+				ComputeNode * toAdd = cNodes[con->endNode->getId()];
+				auto addrInDone = find(done.begin(), done.end(), toAdd);
+				auto addrInSearch = find(searching.begin(), searching.end(), toAdd);
+				if ((addrInDone == done.end() && addrInSearch == searching.end()) || toAdd->getCout() > curr->getCout() + 1) {
+					toAdd->setCout(curr->getCout() + 1);
+					toAdd->setEntry(con);
+					if (addrInSearch == searching.end()) {
+						searching.insert(toAdd);
+					}
+					if (addrInDone != done.end()) {
+						done.erase(toAdd);
+					}
+				}
+			}
+		}
+	}
+	if (!found) {
+		//pas de chemin valide, a ecrire quand le cas arrivera
+		for each (ComputeNode * cn in cNodes)
+		{
+			delete cn;
+		}
+		return vector<Connector *>{};
+	}
+	else {
+		vector<Connector *> result;
+		ComputeNode * last = cNodes[begin];
+		while (last->getNode()->getId() != end) {
+			result.push_back(last->getExit());
+			last = cNodes[last->getExit()->endNode->getId()];
+		}
+		for each (ComputeNode * cn in cNodes)
+		{
+			delete cn;
+		}
+		return result;
+	}
+}
 
 vector<Connector *> Graph::getPath(int begin, int end)
 {
