@@ -5,9 +5,13 @@
 using namespace std;
 
 class MoveState : public State {
-
+private:
+	static MoveState instance;
+	MoveState();
 public:
-	StateType getTransition(TurnInfo& _turnInfo, Agent * agent);
+	static State * get();
+
+	State * getTransition(TurnInfo& _turnInfo, Agent * agent);
 	void onEnter(Agent * agent);
 	Action * onUpdate(TurnInfo& _turnInfo, Agent * agent);
 	void onExit(Agent * agent);

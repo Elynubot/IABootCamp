@@ -18,8 +18,6 @@ private:
 	int nbTurnPassed = 0;
 	vector<Connector *> path;
 	State * currState;
-	State * waitState;
-	State * moveState;
 
 public:
 	void setLogic(MyBotLogic * log) {

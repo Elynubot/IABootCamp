@@ -3,7 +3,20 @@
 #include "../MyBotLogic.h"
 #include "../Context.h"
 
-State::StateType WaitState::getTransition(TurnInfo & _turnInfo, Agent * agent)
+#include "MoveState.h"
+
+WaitState WaitState::instance;
+
+WaitState::WaitState()
+{
+}
+
+State * WaitState::get()
+{
+	return &instance;
+}
+
+State * WaitState::getTransition(TurnInfo & _turnInfo, Agent * agent)
 {
 	Graph graph = Context::get().getGraph();
 	bool found = false;
@@ -14,10 +27,10 @@ State::StateType WaitState::getTransition(TurnInfo & _turnInfo, Agent * agent)
 		}
 	}
 	if (found || agent->getPos() == agent->getGoal()) {
-		return State::NO_CHANGE;
+		return nullptr;
 	}
 	else {
-		return State::move;
+		return MoveState::get();
 	}
 }
 

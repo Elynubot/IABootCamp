@@ -5,9 +5,7 @@
 Agent::Agent(int agentId)
 {
 	id = agentId;
-	waitState = new WaitState();
-	moveState = new MoveState();
-	currState = moveState;
+	currState = MoveState::get();
 }
 
 Action * Agent::Play(TurnInfo& _turnInfo)
@@ -17,19 +15,12 @@ Action * Agent::Play(TurnInfo& _turnInfo)
 
 void Agent::stateChange(TurnInfo& _turnInfo)
 {
-	State::StateType trans;
+	State * trans;
 	trans = currState->getTransition(_turnInfo, this);
 	int count = 1000;
-	while (trans != State::NO_CHANGE && count>0) {
+	while (trans != nullptr && count>0) {
 		currState->onExit(this);
-		switch (trans) {
-		case State::wait:
-			currState = waitState;
-			break;
-		case State::move:
-			currState = moveState;
-			break;
-		}
+		currState = trans;
 		currState->onEnter(this);
 		count--;
 		trans = currState->getTransition(_turnInfo, this);
