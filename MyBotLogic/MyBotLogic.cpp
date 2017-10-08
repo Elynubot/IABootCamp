@@ -2,7 +2,7 @@
 
 #include "TurnInfo.h"
 #include "NPCInfo.h"
-#include <chrono>
+#include "Context.h"
 
 #include "windows.h"
 
@@ -35,47 +35,7 @@ MyBotLogic::MyBotLogic()
 
 /*virtual*/ void MyBotLogic::Init(LevelInfo& _levelInfo)
 {
-	/*bool debug = true;
-	while (debug) {
-		Sleep(2000);
-	}*/
-	graph.init(_levelInfo);
-	for each (auto npc in _levelInfo.npcs)
-	{
-		Agent * ag = new Agent(npc.second.npcID);
-		ag->setPos(npc.second.tileID);
-		ag->setLogic(this);
-		agents.push_back(ag);
-	}
-	vector<int> goals = graph.getGoalPos();
-	vector<bool> taken;
-	for each (int i in goals)
-	{
-		taken.push_back(false);
-	}
-	for each (Agent * agent in agents)
-	{
-		//vector<float> dists = graph.getGoalDistances(agent->pos);
-		float minDist = -1;
-		int minId = -1;
-		for (int i = 0; i < goals.size();i++) {
-			if (!taken[i]) {
-				if (minDist == -1 || graph.dist(agent->getPos(),goals[i]) < minDist) {
-					if (minId != -1) {
-						taken[minId] = false;
-					}
-					minId = i;
-					minDist = graph.dist(agent->getPos(), goals[i]);
-					taken[minId] = true;
-				}
-			}
-		}
-		agent->setGoal(goals[minId]);
-	}
-	for each (Agent * agent in agents)
-	{
-		agent->setPath(graph.getPath(agent->getPos(), agent->getGoal()));
-	}
+	Context::get().start(_levelInfo);
 }
 
 /*virtual*/ void MyBotLogic::OnGameStarted()
@@ -85,14 +45,7 @@ MyBotLogic::MyBotLogic()
 
 /*virtual*/ void MyBotLogic::FillActionList(TurnInfo& _turnInfo, std::vector<Action*>& _actionList)
 {
-	for each (Agent * agent in agents)
-	{
-		agent->stateChange(_turnInfo);
-	}
-	for each (Agent * agent in agents)
-	{
-		_actionList.push_back(agent->Play(_turnInfo));
-	}
+	Context::get().update(_turnInfo, _actionList);
 }
 
 /*virtual*/ void MyBotLogic::Exit()

@@ -134,8 +134,4 @@ vector<int> Graph::getGoalPos()
 
 Graph::~Graph()
 {
-	for each (Node * node in nodes)
-	{
-		delete node;
-	}
 }

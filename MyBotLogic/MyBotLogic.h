@@ -33,17 +33,5 @@ public:
 protected:
 	Logger mLogger;
 
-private:
-	Graph graph;
-	vector<Agent *> agents;
-	bool isFirst = true;
-
-public:
-	vector<Agent *> * getAgents() {
-		return &agents;
-	}
-	Graph * getGraph() {
-		return &graph;
-	}
 };
 
