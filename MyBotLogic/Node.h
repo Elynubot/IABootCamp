@@ -50,16 +50,10 @@ public:
 	void addConnector(Tile::ETilePosition dir, Node * obj);
 	void popConnector(Node * obj);
 
-	friend bool operator==(const Node& l, const Node& r) noexcept;
-	friend bool operator!=(const Node& l, const Node& r) noexcept;
+	friend bool operator==(const Node& l, const Node& r) noexcept {
+		return (l.getId() == r.getId());
+	};
+	friend bool operator!=(const Node& l, const Node& r) noexcept {
+		return (l.getId() != r.getId());
+	};
 };
-
-bool operator==(const Node& l, const Node& r) noexcept
-{
-	return (l.getId() == r.getId());
-}
-
-bool operator!=(const Node& l, const Node& r) noexcept
-{
-	return (l.getId() != r.getId());
-}

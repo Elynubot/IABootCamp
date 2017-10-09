@@ -15,14 +15,14 @@ void Context::start(LevelInfo & _levelInfo)
 	while (debug) {
 		Sleep(1000);
 	}*/
-	graph.init(_levelInfo);
+	graph.init(_levelInfo.rowCount, _levelInfo.colCount, _levelInfo.tiles);
 	for each (auto npc in _levelInfo.npcs)
 	{
 		Agent * ag = new Agent(npc.second.npcID);
 		ag->setPos(npc.second.tileID);
 		agents.push_back(ag);
 	}
-	vector<int> goals = graph.getGoalPos();
+	vector<int> goals = graph.getGoalPosition();
 	vector<bool> taken;
 	for each (int i in goals)
 	{
@@ -30,7 +30,7 @@ void Context::start(LevelInfo & _levelInfo)
 	}
 	for each (Agent * agent in agents)
 	{
-		float minDist = -1;
+		int minDist = -1;
 		int minId = -1;
 		for (int i = 0; i < goals.size(); i++) {
 			if (!taken[i]) {

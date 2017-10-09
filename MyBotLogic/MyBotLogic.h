@@ -2,8 +2,6 @@
 
 #include "BotLogicIF.h"
 #include "Logger.h"
-#include "Graph.h"
-#include "Agent.h"
 
 #ifdef _DEBUG
    #define BOT_LOGIC_DEBUG

@@ -3,8 +3,8 @@
 
 Node::Node(const TileInfo& tileInfo, int colCount) noexcept
 	: x{}
-	, y{ ((int)tileInfo.tileID) / colCount }
-	, id{ tileInfo.tileID }
+	, y{ (int)tileInfo.tileID / colCount  }
+	, id{ (int)tileInfo.tileID }
 	, type{ tileInfo.tileType }
 	, connectors{}
 {

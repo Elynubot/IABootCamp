@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "LevelInfo.h"
 #include "Graph.h"
 #include "Agent.h"
 
