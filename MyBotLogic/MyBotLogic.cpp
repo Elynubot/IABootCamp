@@ -4,7 +4,6 @@
 #include "NPCInfo.h"
 #include "Context.h"
 
-
 #include "windows.h"
 
 MyBotLogic::MyBotLogic()
