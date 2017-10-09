@@ -1,8 +1,15 @@
 #include "Graph.h"
-// ? 
-#include "ComputeNode.h"
-// END ?
 #include <algorithm>
+
+//CHANGE POSITION TO NEW FILE
+#include <queue>
+//According to @skypjack https://stackoverflow.com/questions/41904374/priority-queues-in-c
+template<class T, class C = std::vector<T>, class P = std::less<typename C::value_type> >
+struct MyPriorityQueue : std::priority_queue<T, C, P> {
+	typename C::iterator begin() { return std::priority_queue<T, C, P>::c.begin(); }
+	typename C::iterator end() { return std::priority_queue<T, C, P>::c.end(); }
+};
+//END CHANGE POSITION TO NEW FILE
 
 int Graph::GetPositionId(int x, int y) const noexcept {
 	if ((x >= 0) && (x < colCount) && (y >= 0) && (y < rowCount))
@@ -79,208 +86,183 @@ void Graph::Init(int _rowCount, int _colCount, const std::map<unsigned int, Tile
 	CreateConnectors(tiles);
 }
 
+class Graph::HeuristicManhattan {
+private:
+	const Node* goal;
+public:
+	HeuristicManhattan(const Node* _goal) noexcept
+		: goal{ _goal } {}
+	int operator()(const Node* node) const noexcept {
+		return (abs(goal->GetX() - node->GetX()) + abs(goal->GetY() - node->GetY())) / 2;
+	}
+};
 
-//TO DO
-vector<Connector *> Graph::getPath(int begin, int end)
-{
-	Node * goal = nodes[end];
-	float size = nodes.size()*1.0;
-	auto comp = [size](ComputeNode * a, ComputeNode * b) {return a->getEstim() + (a->getNode()->getId() / size) < b->getEstim() + (b->getNode()->getId() / size); };
-	vector<ComputeNode *> cNodes;
-	set < ComputeNode *, decltype(comp) > searching = set<ComputeNode *, decltype(comp)>(comp);
-	set <ComputeNode *> done;
-	for each (Node * node in nodes)
-	{
-		cNodes.push_back(new ComputeNode(node, goal));
-	}
-	ComputeNode * start = cNodes[begin];
-	start->setCout(0);
-	searching.insert(cNodes[begin]);
-	bool found = false;
-	while (!found && searching.size() > 0) {
-		ComputeNode * curr = *(searching.begin());
-		if (curr->getEntry() != nullptr) {
-			cNodes[curr->getEntry()->beginNode->getId()]->setExit(curr->getEntry());
-		}
-		if (curr->getNode()->getId() == end) {
-			found = true;
-		}
-		else {
-			searching.erase(curr);
-			done.insert(curr);
-			for each (Connector  * con in curr->getNode()->getConnectors())
-			{
-				ComputeNode * toAdd = cNodes[con->endNode->getId()];
-				auto addrInDone = find(done.begin(), done.end(), toAdd);
-				auto addrInSearch = find(searching.begin(), searching.end(), toAdd);
-				if ((addrInDone == done.end() && addrInSearch == searching.end()) || toAdd->getCout() > curr->getCout() + 1) {
-					toAdd->setCout(curr->getCout() + 1);
-					toAdd->setEntry(con);
-					if (addrInSearch == searching.end()) {
-						searching.insert(toAdd);
-					}
-					if (addrInDone != done.end()) {
-						done.erase(toAdd);
-					}
-				}
-			}
-		}
-	}
-	if (!found) {
-		//pas de chemin valide, a ecrire quand le cas arrivera
-		for each (ComputeNode * cn in cNodes)
-		{
-			delete cn;
-		}
-		return vector<Connector *>{};
-	}
-	else {
-		vector<Connector *> result;
-		ComputeNode * last = cNodes[begin];
-		while (last->getNode()->getId() != end) {
-			result.push_back(last->getExit());
-			last = cNodes[last->getExit()->endNode->getId()];
-		}
-		for each (ComputeNode * cn in cNodes)
-		{
-			delete cn;
-		}
-		return result;
-	}
-}
+struct Graph::NodeItem {
+	const Node* ptr;
+	NodeItem* previous;
+	const Connector* connector;
+	int costSoFar;
+	int estimatedTotalCost;
+};
 
-vector<Connector *> Graph::getPath(int begin, int end)
-{
-	Node * goal = nodes[end];
-	float size = nodes.size()*1.0;
-	auto comp = [size](ComputeNode * a, ComputeNode * b) {return a->getEstim()+(a->getNode()->getId()/size) < b->getEstim()+ (b->getNode()->getId() / size); };
-	vector<ComputeNode *> cNodes;
-	set < ComputeNode *, decltype(comp) > searching = set<ComputeNode *, decltype(comp)>(comp);
-	set <ComputeNode *> done;
-	for each (Node * node in nodes)
+class Graph::NodeItemPtrComparison {
+private:
+	bool reverse;
+public:
+	NodeItemPtrComparison(const bool& revparam = false) : reverse{ revparam } {}
+	bool operator() (NodeItem* _lnode, NodeItem* _rnode) const
 	{
-		cNodes.push_back(new ComputeNode(node,goal));
+		if (reverse)
+			return (_lnode->estimatedTotalCost < _rnode->estimatedTotalCost);
+		else
+			return (_lnode->estimatedTotalCost > _rnode->estimatedTotalCost);
 	}
-	ComputeNode * start = cNodes[begin];
-	start->setCout(0);
-	searching.insert(cNodes[begin]);
-	bool found = false;
-	while (!found && searching.size() > 0) {
-		ComputeNode * curr = *(searching.begin());
-		if (curr->getEntry() != nullptr) {
-			cNodes[curr->getEntry()->beginNode->getId()]->setExit(curr->getEntry());
-		}
-		if (curr->getNode()->getId() == end) {
-			found = true;
-		}
-		else {
-			searching.erase(curr);
-			done.insert(curr);
-			for each (Connector  * con in curr->getNode()->getConnectors())
-			{
-				ComputeNode * toAdd = cNodes[con->endNode->getId()];
-				auto addrInDone = find(done.begin(), done.end(), toAdd);
-				auto addrInSearch = find(searching.begin(), searching.end(), toAdd);
-				if ((addrInDone == done.end() && addrInSearch == searching.end()) || toAdd->getCout() > curr->getCout() + 1) {
-					toAdd->setCout(curr->getCout() + 1);
-					toAdd->setEntry(con);
-					if (addrInSearch == searching.end()) {
-						searching.insert(toAdd);
-					}
-					if (addrInDone != done.end()) {
-						done.erase(toAdd);
-					}
-				}
-			}
-		}
-	}
-	if (!found) {
-		//pas de chemin valide, a ecrire quand le cas arrivera
-		for each (ComputeNode * cn in cNodes)
-		{
-			delete cn;
-		}
-		return vector<Connector *>{};
-	}
-	else {
-		vector<Connector *> result;
-		ComputeNode * last = cNodes[begin];
-		while (last->getNode()->getId() != end) {
-			result.push_back(last->getExit());
-			last = cNodes[last->getExit()->endNode->getId()];
-		}
-		for each (ComputeNode * cn in cNodes)
-		{
-			delete cn;
-		}
-		return result;
-	}
-}
+};
 
-void Graph::init(LevelInfo & levelInfo)
-{
-	for (int i = 0; i < levelInfo.rowCount; i++) {
-		for (int j = 0; j < levelInfo.colCount; j++) {
-			nodes.push_back(new Node(i*levelInfo.colCount + j, j, i, levelInfo.tiles[i*levelInfo.colCount + j].tileType));
+vector<const Connector*> Graph::GetPath(int startId, int goalId) const {
+	const Node* start{ &GetNode(startId) };
+	const Node* end{ &GetNode(goalId) };
+	//Initialize heuristic
+	HeuristicManhattan heuristic{ &GetNode(goalId)};
+
+	//Initialize the record for the start node
+	NodeItem *startRecord = new NodeItem{};
+	startRecord->ptr = start;
+	startRecord->previous = nullptr;
+	startRecord->connector = nullptr;
+	startRecord->costSoFar = 0;
+	startRecord->estimatedTotalCost = heuristic(start);
+
+	//Initialize the open and the closed list
+	vector<NodeItem*> closedList;
+	MyPriorityQueue<NodeItem*, std::vector<NodeItem*>, NodeItemPtrComparison> openList;
+
+	openList.push(startRecord);
+	NodeItem* current;
+	//Iterate through processing each node
+	while (openList.size() > 0) {
+		//Find the smallest element in the open list
+		current = openList.top();
+		openList.pop();
+		//If it is the goal node, then terminate
+		if (*current->ptr == *end) {
+			break;
 		}
-	}
-	for each (Node * node in nodes)
-	{
-		if (levelInfo.tiles[node->getId()].tileType != Tile::TileAttribute_Forbidden) {
-			if (node->getY() % 2 == 0) {
-				if (node->getY() > 0) {
-					if (node->getX() > 0) {
-						node->addConnector(Tile::NW, nodes[(node->getY() - 1)*levelInfo.colCount + node->getX() - 1]);
-					}
-					node->addConnector(Tile::NE, nodes[(node->getY() - 1)*levelInfo.colCount + node->getX()]);
-				}
-				if (node->getY() < levelInfo.rowCount - 1) {
-					if (node->getX() > 0) {
-						node->addConnector(Tile::SW, nodes[(node->getY() + 1)*levelInfo.colCount + node->getX() - 1]);
-					}
-					node->addConnector(Tile::SE, nodes[(node->getY() + 1)*levelInfo.colCount + node->getX()]);
-				}
+
+		//Otherwise get its outgoing connections
+		const vector<Connector>* neighbours = current->ptr->GetConnectors();
+
+		//Loop through each neighbours
+		for (auto& neighbour : *neighbours) {
+
+			//Get the cost estimate for the neighbourNode
+			const Node* neighbourNode = neighbour.cGetEndNode();
+			int neighbourNodeCost = current->costSoFar + 1;
+
+			NodeItem* neighbourRecord = new NodeItem();
+			int neighbourNodeHeuristic;
+
+			//Here we find the record in the open list corresponding to the neighbourNode if it exist
+			std::vector<NodeItem*>::iterator neighbourRecordOpen = std::find_if(openList.begin(), openList.end(), [&neighbour](NodeItem* ni) ->bool {
+				return (*ni->ptr == *neighbour.cGetEndNode());
+			});
+
+			//If the node is closed we may have to skip, or remove it from the closed list
+			if 
+				(//Here we find the record in the closed list corresponding to the neighbourNode if it exist
+				std::vector<NodeItem*>::iterator neighbourRecordClose = std::find_if(closedList.begin(), closedList.end(), [&neighbour](NodeItem* ni) -> bool {
+					return (*ni->ptr == *neighbour.cGetEndNode());
+				}); neighbourRecordClose != closedList.end()) {
+
+				neighbourRecord = *neighbourRecordClose;
+
+				//if we didn't find a shorter route, skip
+				if (neighbourRecord->costSoFar <= neighbourNodeCost)
+					continue; //jump to the end of the looop
+
+							  //otherwise remove it from the closed list
+				closedList.erase(neighbourRecordClose);
+
+				//we can use the node's old cost values to calculate its heuristic 
+				//without calling the possibly expensive heuristic function
+				neighbourNodeHeuristic = neighbourRecord->estimatedTotalCost - neighbourRecord->costSoFar;
 			}
+
+			//Skip if the node is open and we've not found a better route
+			else if 
+				(neighbourRecordOpen != openList.end()) {
+				
+				neighbourRecord = *neighbourRecordOpen;
+				//If our route is no better, then skip
+				if (neighbourRecord->costSoFar <= neighbourNodeCost)
+					continue; //jump to the end of the looop
+
+							  //We can use the node's old cost values to calculate its heuristic 
+							  //without calling the possibly expensive heuristic function
+				neighbourNodeHeuristic = neighbourRecord->estimatedTotalCost - neighbourRecord->costSoFar;
+			}
+
+			//Otherwise we know we've got an unvisited node, so make a record for it
 			else {
-				if (node->getY() > 0) {
-					if (node->getX() < levelInfo.colCount - 1) {
-						node->addConnector(Tile::NE, nodes[(node->getY() - 1)*levelInfo.colCount + node->getX() + 1]);
-					}
-					node->addConnector(Tile::NW, nodes[(node->getY() - 1)*levelInfo.colCount + node->getX()]);
-				}
-				if (node->getY() < levelInfo.rowCount - 1) {
-					if (node->getX() < levelInfo.colCount - 1) {
-						node->addConnector(Tile::SE, nodes[(node->getY() + 1)*levelInfo.colCount + node->getX() + 1]);
-					}
-					node->addConnector(Tile::SW, nodes[(node->getY() + 1)*levelInfo.colCount + node->getX()]);
-				}
+				neighbourRecord->ptr = neighbour.cGetEndNode();
+
+				//We'll need to calculate the heuristic value using the function, since we don't have an existing record to use
+				neighbourNodeHeuristic = heuristic(neighbourRecord->ptr);
 			}
-			if (node->getX() > 0) {
-				node->addConnector(Tile::W, nodes[node->getId() - 1]);
-			}
-			if (node->getX() < levelInfo.colCount - 1) {
-				node->addConnector(Tile::E, nodes[node->getId() + 1]);
+
+			//We're here if we need to update the node
+			//Update the cost, estimate and connection
+			neighbourRecord->previous = current;
+			neighbourRecord->connector = &neighbour;
+			neighbourRecord->costSoFar = neighbourNodeCost;
+			neighbourRecord->estimatedTotalCost = neighbourNodeCost + neighbourNodeHeuristic;
+
+			//And add it to the open list
+			if (neighbourRecordOpen == openList.end()) {
+				openList.push(neighbourRecord);
 			}
 		}
+
+		//We've finished looking at the connections for the current node, so add it to the closed list and remove it from the openlist
+		closedList.push_back(current);
 	}
+
+	//Compile the list of connections in the path
+	//HERE TALK ABOUT POINTER
+	vector<const Connector*> path;
+
+	//We're here if we've either found the goal, or if we've no more nodes to search, find which.
+	if (*current->ptr != *end)
+		throw NoPathFound{}; //We've run out of nodes without finding the goal, so there's no solution
+	else {
+		//Work back along the path, accumulating connections
+		while (*current->ptr != *start) {
+			path.push_back(current->connector);
+			current = current->previous;
+		}
+	}
+
+	//We liberate all the memory allocate for the NodeRecord* in the closedList and in the openList
+	std::for_each(closedList.begin(), closedList.end(), [](NodeItem* ni) {
+		ni->previous = nullptr;
+		delete(ni);
+	});
+
+	std::for_each(openList.begin(), openList.end(), [](NodeItem* ni) {
+		ni->previous = nullptr;
+		delete(ni);
+	});
+
+	return path;
 }
 
-vector<int> Graph::getGoalPos()
+vector<int> Graph::GetGoalPosition() const noexcept
 {
 	vector<int> result;
-	for each (Node * node in nodes)
-	{
-		if (node->getType() == Tile::TileAttribute_Goal) {
-			result.push_back(node->getId());
-		}
-	}
+	for_each(nodes.begin(), nodes.end(), [&result](const Node& node) {
+		if (node.IsGoal())
+			result.push_back(node.GetId());
+	});
 	return result;
 }
 
-Graph::~Graph()
-{
-	for each (Node * node in nodes)
-	{
-		delete node;
-	}
-}

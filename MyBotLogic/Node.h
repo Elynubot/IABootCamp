@@ -46,8 +46,23 @@ public:
 	void ClearConnectors() noexcept {
 		connectors.clear();
 	}
+	bool IsGoal() const noexcept {
+		return GetType() == Tile::TileAttribute_Goal;
+	}
 
 	void AddConnector(Tile::ETilePosition dir, Node * obj);
 	void PopConnector(Node * obj);
+
+	friend bool operator==(const Node& l, const Node& r) noexcept;
+	friend bool operator!=(const Node& l, const Node& r) noexcept;
 };
 
+bool operator==(const Node& l, const Node& r) noexcept
+{
+	return (l.GetId() == r.GetId());
+}
+
+bool operator!=(const Node& l, const Node& r) noexcept
+{
+	return (l.GetId() != r.GetId());
+}

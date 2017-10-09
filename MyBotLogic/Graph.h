@@ -3,10 +3,6 @@
 #include "Node.h"
 #include <map>
 
-// ?
-#include "Agent.h"
-// END ? 
-
 using namespace std;
 
 class Graph
@@ -17,7 +13,9 @@ private:
 	vector<Node> nodes;
 
 private:
-
+	const Node& GetNode(int id) const noexcept {
+		return nodes[id];
+	}
 	int GetPositionId(int x, int y) const noexcept; 
 
 	//Try to add to the node the connector based on the dir and the x/y of the obj node
@@ -33,18 +31,14 @@ public:
 
 	void Update(const map<unsigned int, TileInfo>& tiles) noexcept;
 	
-	
-	//TO DO
-	float dist(int begin, int end) {
-		return dist(nodes[begin], nodes[end]);
-	}
-	float dist(Node * begin, Node * end) {
-		return (abs(begin->getCX()*1.0f - end->getCX()*1.0f) + abs(begin->getCY()*1.0f - end->getCY()*1.0f) + abs(begin->getCZ()*1.0f - end->getCZ()*1.0f)) / 2.0f;
-	}
-	vector<Connector *> getPath(int begin, int end);
-	
-	vector<int> getGoalPos();
-	
+private:
+	class HeuristicManhattan;
+	struct NodeItem;
+	class NodeItemPtrComparison;
+	class NoPathFound {};
+public:
+	vector<int> Graph::GetGoalPosition() const noexcept;
+	vector<const Connector*> GetPath(int beginId, int goalId) const noexcept;
 };
 
 
