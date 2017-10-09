@@ -13,23 +13,23 @@ private:
 	vector<Node> nodes;
 
 private:
-	const Node& GetNode(int id) const noexcept {
+	Node& getNode(int id) noexcept {
 		return nodes[id];
 	}
-	int GetPositionId(int x, int y) const noexcept; 
+	int getPositionId(int x, int y) const noexcept; 
 
 	//Try to add to the node the connector based on the dir and the x/y of the obj node
-	void TryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) noexcept;
+	void tryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) noexcept;
 
 	//Create the nodes without their connectors with the Node constructor
-	void CreateNodes(const map<unsigned int, TileInfo>& tiles) noexcept;
+	void createNodes(const map<unsigned int, TileInfo>& tiles) noexcept;
 	//Create the connectors for each accessible neighbours for each node
-	void CreateConnectors(const map<unsigned int, TileInfo>& tiles);
+	void createConnectors(const map<unsigned int, TileInfo>& tiles) noexcept;
 
 public:
-	void Init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles);
+	void init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles);
 
-	void Update(const map<unsigned int, TileInfo>& tiles) noexcept;
+	void update(const map<unsigned int, TileInfo>& tiles) noexcept;
 	
 private:
 	class HeuristicManhattan;
@@ -37,8 +37,13 @@ private:
 	class NodeItemPtrComparison;
 	class NoPathFound {};
 public:
-	vector<int> Graph::GetGoalPosition() const noexcept;
-	vector<const Connector*> GetPath(int beginId, int goalId) const noexcept;
+	vector<int> getGoalPosition() const noexcept;
+	vector<const Connector*> getPath(int beginId, int goalId);
+	int dist(int n1, int n2) const noexcept {
+		const Node* node1{ &nodes[n1] };
+		const Node* node2{ &nodes[n2] };
+		return (abs(node1->getX() - node2->getX()) + abs(node1->getY() - node2->getY()));
+	}
 };
 
 

@@ -11,20 +11,21 @@ struct MyPriorityQueue : std::priority_queue<T, C, P> {
 };
 //END CHANGE POSITION TO NEW FILE
 
-int Graph::GetPositionId(int x, int y) const noexcept {
+int Graph::getPositionId(int x, int y) const noexcept {
 	if ((x >= 0) && (x < colCount) && (y >= 0) && (y < rowCount))
 		return x / 2 + colCount * y;
 	return -1;
 }
 
-void Graph::TryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) noexcept {
-	if (int i = GetPositionId(x, y); i != -1) {
-		node.AddConnector(dir, &nodes[i]);
+void Graph::tryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) noexcept {
+	int i = getPositionId(x, y);
+	if (i != -1) {
+		node.addConnector(dir, &nodes[i]);
 	}
 }
 
 //Create the nodes without their connectors with the Node constructor
-void Graph::CreateNodes(const map<unsigned int, TileInfo>& tiles) noexcept {
+void Graph::createNodes(const map<unsigned int, TileInfo>& tiles) noexcept {
 	nodes.resize(tiles.size());
 	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
 		nodes[tile.second.tileID] = Node(tile.second, colCount);
@@ -32,57 +33,56 @@ void Graph::CreateNodes(const map<unsigned int, TileInfo>& tiles) noexcept {
 }
 
 //Create the connectors for each accessible neighbours for each node
-void Graph::CreateConnectors(const map<unsigned int, TileInfo>& tiles) noexcept {
+void Graph::createConnectors(const map<unsigned int, TileInfo>& tiles) noexcept {
 	for_each(nodes.begin(), nodes.end(), [&](Node& node) {
-		int x{ node.GetX() };
-		int y{ node.GetY() };
-		TryAddConnector(node, Tile::NW, x - 1, y - 1);
-		TryAddConnector(node, Tile::NE, x + 1, y - 1);
-		TryAddConnector(node, Tile::W, x - 2, y);
-		TryAddConnector(node, Tile::E, x + 2, y);
-		TryAddConnector(node, Tile::SW, x - 1, y + 1);
-		TryAddConnector(node, Tile::SE, x + 1, y + 1);
+		int x{ node.getX() };
+		int y{ node.getY() };
+		tryAddConnector(node, Tile::NW, x - 1, y - 1);
+		tryAddConnector(node, Tile::NE, x + 1, y - 1);
+		tryAddConnector(node, Tile::W, x - 2, y);
+		tryAddConnector(node, Tile::E, x + 2, y);
+		tryAddConnector(node, Tile::SW, x - 1, y + 1);
+		tryAddConnector(node, Tile::SE, x + 1, y + 1);
 	});
 }
 
-void Graph::Update(const map<unsigned int, TileInfo>& tiles) noexcept {
-	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
-		Node& node = nodes[tile.second.tileID];
-		if ((node.GetType() == Tile::TileAttribute_Forbidden) && (tile.second.tileType != Tile::TileAttribute_Forbidden)) {
-			int x{ node.GetX() };
-			int y{ node.GetY() };
-			//Create new connectors for the node
-			TryAddConnector(node, Tile::NW, x - 1, y - 1);
-			TryAddConnector(node, Tile::NE, x + 1, y - 1);
-			TryAddConnector(node, Tile::W, x - 2, y);
-			TryAddConnector(node, Tile::E, x + 2, y);
-			TryAddConnector(node, Tile::SW, x - 1, y + 1);
-			TryAddConnector(node, Tile::SE, x + 1, y + 1);
-			//Create new connectors for the neighbours of the node
-			const vector<Connector>* connectors{ node.GetConnectors() };
-			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
-				connector.GetEndNode()->AddConnector(connector.GetInvertDirection(), connector.GetBeginNode());
-			});
-		}
-		else if ((node.GetType() != Tile::TileAttribute_Forbidden) && (tile.second.tileType == Tile::TileAttribute_Forbidden)) {
-			//Pop old connectors for the neighbours of the node
-			const vector<Connector>* connectors{ node.GetConnectors() };
-			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
-				connector.GetEndNode()->PopConnector(connector.GetBeginNode());
-			});
-			//Clear connectors for the node
-			node.ClearConnectors();
-		}
-		node.SetType(tile.second.tileType);
-	});
-}
-
-
-void Graph::Init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles) {
+void Graph::init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles) {
 	rowCount = _rowCount;
 	colCount = _colCount;
-	CreateNodes(tiles);
-	CreateConnectors(tiles);
+	createNodes(tiles);
+	createConnectors(tiles);
+}
+
+void Graph::update(const map<unsigned int, TileInfo>& tiles) noexcept {
+	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
+		Node& node = nodes[tile.second.tileID];
+		if ((node.getType() == Tile::TileAttribute_Forbidden) && (tile.second.tileType != Tile::TileAttribute_Forbidden)) {
+			int x{ node.getX() };
+			int y{ node.getY() };
+			//Create new connectors for the node
+			tryAddConnector(node, Tile::NW, x - 1, y - 1);
+			tryAddConnector(node, Tile::NE, x + 1, y - 1);
+			tryAddConnector(node, Tile::W, x - 2, y);
+			tryAddConnector(node, Tile::E, x + 2, y);
+			tryAddConnector(node, Tile::SW, x - 1, y + 1);
+			tryAddConnector(node, Tile::SE, x + 1, y + 1);
+			//Create new connectors for the neighbours of the node
+			vector<Connector>* connectors{ node.getConnectors() };
+			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
+				connector.getEndNode()->addConnector(connector.getInvertDirection(), connector.getBeginNode());
+			});
+		}
+		else if ((node.getType() != Tile::TileAttribute_Forbidden) && (tile.second.tileType == Tile::TileAttribute_Forbidden)) {
+			//Pop old connectors for the neighbours of the node
+			vector<Connector>* connectors{ node.getConnectors() };
+			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
+				connector.getEndNode()->popConnector(connector.getBeginNode());
+			});
+			//Clear connectors for the node
+			node.clearConnectors();
+		}
+		node.setType(tile.second.tileType);
+	});
 }
 
 class Graph::HeuristicManhattan {
@@ -92,12 +92,12 @@ public:
 	HeuristicManhattan(const Node* _goal) noexcept
 		: goal{ _goal } {}
 	int operator()(const Node* node) const noexcept {
-		return (abs(goal->GetX() - node->GetX()) + abs(goal->GetY() - node->GetY())) / 2;
+		return (abs(goal->getX() - node->getX()) + abs(goal->getY() - node->getY())) / 2;
 	}
 };
 
 struct Graph::NodeItem {
-	const Node* ptr;
+	Node* ptr;
 	NodeItem* previous;
 	const Connector* connector;
 	int costSoFar;
@@ -118,11 +118,11 @@ public:
 	}
 };
 
-vector<const Connector*> Graph::GetPath(int startId, int goalId) const {
-	const Node* start{ &GetNode(startId) };
-	const Node* end{ &GetNode(goalId) };
+vector<const Connector*> Graph::getPath(int startId, int goalId) {
+	Node* start{ &getNode(startId) };
+	Node* end{ &getNode(goalId) };
 	//Initialize heuristic
-	HeuristicManhattan heuristic{ &GetNode(goalId)};
+	HeuristicManhattan heuristic{ &getNode(goalId)};
 
 	//Initialize the record for the start node
 	NodeItem *startRecord = new NodeItem{};
@@ -149,13 +149,13 @@ vector<const Connector*> Graph::GetPath(int startId, int goalId) const {
 		}
 
 		//Otherwise get its outgoing connections
-		const vector<Connector>* neighbours = current->ptr->GetConnectors();
+		vector<Connector>* neighbours = current->ptr->getConnectors();
 
 		//Loop through each neighbours
 		for (auto& neighbour : *neighbours) {
 
 			//Get the cost estimate for the neighbourNode
-			const Node* neighbourNode = neighbour.cGetEndNode();
+			const Node* neighbourNode = neighbour.getEndNodeC();
 			int neighbourNodeCost = current->costSoFar + 1;
 
 			NodeItem* neighbourRecord = new NodeItem();
@@ -163,15 +163,17 @@ vector<const Connector*> Graph::GetPath(int startId, int goalId) const {
 
 			//Here we find the record in the open list corresponding to the neighbourNode if it exist
 			std::vector<NodeItem*>::iterator neighbourRecordOpen = std::find_if(openList.begin(), openList.end(), [&neighbour](NodeItem* ni) ->bool {
-				return (*ni->ptr == *neighbour.cGetEndNode());
+				return (*ni->ptr == *neighbour.getEndNodeC());
+			});
+
+			//Here we find the record in the closed list corresponding to the neighbourNode if it exist
+			std::vector<NodeItem*>::iterator neighbourRecordClose = std::find_if(closedList.begin(), closedList.end(), [&neighbour](NodeItem* ni) -> bool {
+				return (*ni->ptr == *neighbour.getEndNodeC());
 			});
 
 			//If the node is closed we may have to skip, or remove it from the closed list
 			if 
-				(//Here we find the record in the closed list corresponding to the neighbourNode if it exist
-				std::vector<NodeItem*>::iterator neighbourRecordClose = std::find_if(closedList.begin(), closedList.end(), [&neighbour](NodeItem* ni) -> bool {
-					return (*ni->ptr == *neighbour.cGetEndNode());
-				}); neighbourRecordClose != closedList.end()) {
+				(neighbourRecordClose != closedList.end()) {
 
 				neighbourRecord = *neighbourRecordClose;
 
@@ -203,7 +205,7 @@ vector<const Connector*> Graph::GetPath(int startId, int goalId) const {
 
 			//Otherwise we know we've got an unvisited node, so make a record for it
 			else {
-				neighbourRecord->ptr = neighbour.cGetEndNode();
+				neighbourRecord->ptr = neighbour.getEndNode();
 
 				//We'll need to calculate the heuristic value using the function, since we don't have an existing record to use
 				neighbourNodeHeuristic = heuristic(neighbourRecord->ptr);
@@ -255,12 +257,12 @@ vector<const Connector*> Graph::GetPath(int startId, int goalId) const {
 	return path;
 }
 
-vector<int> Graph::GetGoalPosition() const noexcept
+vector<int> Graph::getGoalPosition() const noexcept
 {
 	vector<int> result;
 	for_each(nodes.begin(), nodes.end(), [&result](const Node& node) {
-		if (node.IsGoal())
-			result.push_back(node.GetId());
+		if (node.isGoal())
+			result.push_back(node.getId());
 	});
 	return result;
 }

@@ -25,10 +25,6 @@ public:
 	void setCout(int nCout) {
 		cout = nCout;
 	}
-	float calcEstim(Node * dest) {
-		estimation = (abs(node->getCX()*1.0f - dest->getCX()*1.0f) + abs(node->getCY()*1.0f - dest->getCY()*1.0f) + abs(node->getCZ()*1.0f - dest->getCZ())*1.0f) / 2.0f;
-		return estimation;
-	}
 	void setEntry(Connector * con) {
 		entry = con;
 	}

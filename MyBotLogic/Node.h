@@ -4,54 +4,51 @@
 #include "Connector.h"
 #include <vector>
 
-using namespace std;
-
 class Node
 {
-public:
-	using value_type = int;
 private:
 	//XY Coordinates
-	value_type x;
-	value_type y;
+	int x;
+	int y;
 
-	value_type id;
+	int id;
 	Tile::ETileType type;
-	vector<Connector> connectors; //Only connectors without any forbidden type on both end are stored
+	std::vector<Connector> connectors; //Only connectors without any forbidden type on both end are stored
 	
 public:
+	Node() = default;
 	Node(const TileInfo& tileInfo, int colCount) noexcept;
 
-	value_type GetX() const noexcept {
+	int getX() const noexcept {
 		return x;
 	}
-	value_type GetY() const noexcept {
+	int getY() const noexcept {
 		return y;
 	}
 
-	value_type GetId() const noexcept {
+	int getId() const noexcept {
 		return id;
 	}
 
-	Tile::ETileType GetType() const noexcept {
+	Tile::ETileType getType() const noexcept {
 		return type;
 	}
-	void SetType(Tile::ETileType _type) noexcept {
+	void setType(Tile::ETileType _type) noexcept {
 		type = _type;
 	}
 
-	const vector<Connector>* GetConnectors() const noexcept {
+	std::vector<Connector>* getConnectors() noexcept {
 		return &connectors;
 	}
-	void ClearConnectors() noexcept {
+	void clearConnectors() noexcept {
 		connectors.clear();
 	}
-	bool IsGoal() const noexcept {
-		return GetType() == Tile::TileAttribute_Goal;
+	bool isGoal() const noexcept {
+		return getType() == Tile::TileAttribute_Goal;
 	}
 
-	void AddConnector(Tile::ETilePosition dir, Node * obj);
-	void PopConnector(Node * obj);
+	void addConnector(Tile::ETilePosition dir, Node * obj);
+	void popConnector(Node * obj);
 
 	friend bool operator==(const Node& l, const Node& r) noexcept;
 	friend bool operator!=(const Node& l, const Node& r) noexcept;
@@ -59,10 +56,10 @@ public:
 
 bool operator==(const Node& l, const Node& r) noexcept
 {
-	return (l.GetId() == r.GetId());
+	return (l.getId() == r.getId());
 }
 
 bool operator!=(const Node& l, const Node& r) noexcept
 {
-	return (l.GetId() != r.GetId());
+	return (l.getId() != r.getId());
 }

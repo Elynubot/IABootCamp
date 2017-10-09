@@ -1,40 +1,29 @@
 #include "Agent.h"
-#include "MoveState.h"
-#include "WaitState.h"
+#include "State/MoveState.h"
+#include "State/WaitState.h"
 
 Agent::Agent(int agentId)
 {
 	id = agentId;
-	waitState = new WaitState();
-	waitState->setAgent(this);
-	moveState = new MoveState();
-	moveState->setAgent(this);
-	currState = moveState;
+	currState = MoveState::get();
 }
 
 Action * Agent::Play(TurnInfo& _turnInfo)
 {
-	return currState->onUpdate(_turnInfo);
+	return currState->onUpdate(_turnInfo, this);
 }
 
 void Agent::stateChange(TurnInfo& _turnInfo)
 {
-	State::StateType trans;
-	trans = currState->getTransition(_turnInfo);
+	State * trans;
+	trans = currState->getTransition(_turnInfo, this);
 	int count = 1000;
-	while (trans != State::NO_CHANGE && count>0) {
-		currState->onExit();
-		switch (trans) {
-		case State::wait:
-			currState = waitState;
-			break;
-		case State::move:
-			currState = moveState;
-			break;
-		}
-		currState->onEnter();
+	while (trans != nullptr && count>0) {
+		currState->onExit(this);
+		currState = trans;
+		currState->onEnter(this);
 		count--;
-		trans = currState->getTransition(_turnInfo);
+		trans = currState->getTransition(_turnInfo, this);
 	}
 }
 

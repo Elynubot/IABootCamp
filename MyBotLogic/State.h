@@ -5,24 +5,14 @@
 
 class Agent;
 class State {
-
 protected:
-	Agent * agent;
+	State() = default;
+private:
+	State(State&) = delete;
+	State& operator=(State&) = delete;
 public:
-	enum StateType {
-		NO_CHANGE,
-		wait,
-		move
-	};
-
-	Agent * getAgent() {
-		return agent;
-	}
-	void setAgent(Agent * nAgent) {
-		agent = nAgent;
-	}
-	virtual StateType getTransition(TurnInfo& _turnInfo)=0;
-	virtual void onEnter()=0;
-	virtual Action * onUpdate(TurnInfo& _turnInfo)=0;
-	virtual void onExit()=0;
+	virtual State * getTransition(TurnInfo& _turnInfo, Agent * agent)=0;
+	virtual void onEnter(Agent * agent)=0;
+	virtual Action * onUpdate(TurnInfo& _turnInfo, Agent * agent)=0;
+	virtual void onExit(Agent * agent)=0;
 };

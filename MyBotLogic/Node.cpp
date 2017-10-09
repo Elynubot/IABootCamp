@@ -3,26 +3,26 @@
 
 Node::Node(const TileInfo& tileInfo, int colCount) noexcept
 	: x{}
-	, y{ tileInfo.tileID / colCount }
+	, y{ ((int)tileInfo.tileID) / colCount }
 	, id{ tileInfo.tileID }
 	, type{ tileInfo.tileType }
 	, connectors{}
 {
-	x = 2*(tileInfo.tileID % colCount) + y % 2;
+	x = 2*(static_cast<int>(tileInfo.tileID) % colCount) + y % 2;
 }
 
-void Node::AddConnector(Tile::ETilePosition dir, Node * obj) {
+void Node::addConnector(Tile::ETilePosition dir, Node * obj) {
 	//Add target obj in connector
-	if ((obj->GetType() != Tile::TileAttribute_Forbidden)&&(GetType() != Tile::TileAttribute_Forbidden)) {
+	if ((obj->getType() != Tile::TileAttribute_Forbidden)&&(getType() != Tile::TileAttribute_Forbidden)) {
 		connectors.push_back(Connector(this, obj, dir));
 	}
 }
 
-void Node::PopConnector(Node * obj) {
+void Node::popConnector(Node * obj) {
 	//Pop target obj in connectors
 	int i{};
 	while (i < connectors.size()) {
-		if (connectors[i].cGetEndNode == obj) {
+		if (connectors[i].getEndNodeC() == obj) {
 			connectors.erase(connectors.begin() + i);
 			break;
 		}
