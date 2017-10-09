@@ -23,7 +23,6 @@ void Graph::TryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) n
 	}
 }
 
-
 //Create the nodes without their connectors with the Node constructor
 void Graph::CreateNodes(const map<unsigned int, TileInfo>& tiles) noexcept {
 	nodes.resize(tiles.size());
