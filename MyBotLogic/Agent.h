@@ -8,24 +8,16 @@
 
 using namespace std;
 
-class MyBotLogic;
 class Agent {
 private:
-	MyBotLogic * logic;
 	int id;
 	int goal;
 	int pos;
 	int nbTurnPassed = 0;
-	vector<Connector *> path;
+	vector<const Connector *> path;
 	State * currState;
 
 public:
-	void setLogic(MyBotLogic * log) {
-		logic = log;
-	}
-	MyBotLogic * getLogic() {
-		return logic;
-	}
 	int getWaited() {
 		return nbTurnPassed;
 	}
@@ -47,10 +39,10 @@ public:
 	void setPos(int nPos) {
 		pos = nPos;
 	}
-	void setPath(vector<Connector *>& nPath) {
+	void setPath(vector<const Connector *>& nPath) {
 		path = nPath;
 	}
-	vector<Connector *>& getPath() {
+	vector<const Connector *>& getPath() {
 		return path;
 	}
 	int getPosAtTurn(int turn) {
