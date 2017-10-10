@@ -12,7 +12,7 @@ struct MyPriorityQueue : std::priority_queue<T, C, P> {
 //END CHANGE POSITION TO NEW FILE
 
 int Graph::getPositionId(int x, int y) const noexcept {
-	if ((x >= 0) && (x < colCount) && (y >= 0) && (y < rowCount))
+	if ((x >= 0) && (x < colCount*2) && (y >= 0) && (y < rowCount))
 		return x / 2 + colCount * y;
 	return -1;
 }
