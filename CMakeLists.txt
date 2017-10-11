@@ -52,6 +52,15 @@ SET( AIBOT_HEADERS
 	
 	MyBotLogic/State/WaitState.h
 	MyBotLogic/State/MoveState.h
+	
+	MyBotLogic/BehaviourTree/Composite.h
+	MyBotLogic/BehaviourTree/Conditions.h
+	MyBotLogic/BehaviourTree/Discover.h
+	MyBotLogic/BehaviourTree/FindObjective.h
+	MyBotLogic/BehaviourTree/GoalTree.h
+	MyBotLogic/BehaviourTree/Selector.h
+	MyBotLogic/BehaviourTree/Sequence.h
+	MyBotLogic/BehaviourTree/Task.h
 )
 
 SET( AIBOT_SRC 
@@ -73,6 +82,15 @@ SET( AIBOT_SRC
 	
 	MyBotLogic/State/WaitState.cpp
 	MyBotLogic/State/MoveState.cpp
+	
+	MyBotLogic/BehaviourTree/Composite.cpp
+	MyBotLogic/BehaviourTree/Conditions.cpp
+	MyBotLogic/BehaviourTree/Discover.cpp
+	MyBotLogic/BehaviourTree/FindObjective.cpp
+	MyBotLogic/BehaviourTree/GoalTree.cpp
+	MyBotLogic/BehaviourTree/Selector.cpp
+	MyBotLogic/BehaviourTree/Sequence.cpp
+	MyBotLogic/BehaviourTree/Task.cpp
 	
 	#Main
 	Main.cpp
