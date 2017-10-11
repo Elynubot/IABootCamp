@@ -20,7 +20,7 @@ State * MoveState::getTransition(TurnInfo & _turnInfo, Agent * agent)
 {
 	Graph graph = Context::get().getGraph();
 	bool found = false;
-	for each (Agent * ag in Context::get().getAgents())
+	for (Agent * ag : Context::get().getAgents())
 	{
 		if (ag->getId() != agent->getId() && ag->getPosAtTurn(_turnInfo.turnNb + 1) == agent->getPosAtTurn(_turnInfo.turnNb + 1) && (graph.dist(agent->getPos(), agent->getGoal()) < graph.dist(ag->getPos(), ag->getGoal()) || (graph.dist(agent->getPos(), agent->getGoal()) == graph.dist(ag->getPos(), ag->getGoal()) && agent->getId() > ag->getId()))) {
 			found = true;

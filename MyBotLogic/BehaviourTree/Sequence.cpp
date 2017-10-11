@@ -2,7 +2,7 @@
 
 Task::Result Sequence::execute(Agent * ag)
 {
-	for each (const auto &child in children)
+	for (const auto &child : children)
 	{
 		if (child->execute(ag) == Task::FAILURE) {
 			return Task::FAILURE;

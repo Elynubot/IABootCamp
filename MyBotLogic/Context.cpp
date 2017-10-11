@@ -16,7 +16,7 @@ void Context::start(LevelInfo & _levelInfo)
 		Sleep(1000);
 	}*/
 	graph.init(_levelInfo.rowCount, _levelInfo.colCount, _levelInfo.tiles);
-	for each (auto npc in _levelInfo.npcs)
+	for (auto npc : _levelInfo.npcs)
 	{
 		Agent * ag = new Agent(npc.second.npcID);
 		ag->setPos(npc.second.tileID);
@@ -24,11 +24,11 @@ void Context::start(LevelInfo & _levelInfo)
 	}
 	vector<int> goals = graph.getGoalPosition();
 	vector<bool> taken;
-	for each (int i in goals)
+	for (int i : goals)
 	{
 		taken.push_back(false);
 	}
-	for each (Agent * agent in agents)
+	for (Agent * agent : agents)
 	{
 		int minDist = -1;
 		int minId = -1;
@@ -46,7 +46,7 @@ void Context::start(LevelInfo & _levelInfo)
 		}
 		agent->setGoal(goals[minId]);
 	}
-	for each (Agent * agent in agents)
+	for (Agent * agent : agents)
 	{
 		agent->setPath(graph.getPath(agent->getPos(), agent->getGoal()));
 	}
@@ -54,11 +54,11 @@ void Context::start(LevelInfo & _levelInfo)
 
 void Context::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList)
 {
-	for each (Agent * agent in agents)
+	for (Agent * agent : agents)
 	{
 		agent->stateChange(_turnInfo);
 	}
-	for each (Agent * agent in agents)
+	for (Agent * agent : agents)
 	{
 		_actionList.push_back(agent->Play(_turnInfo));
 	}

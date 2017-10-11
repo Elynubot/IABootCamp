@@ -5,7 +5,7 @@ Task::Result IsGoalReached::execute(Agent *)
 	return Result();
 }
 
-Task::Result IsPathInvalidate::execute(Agent *)
+Task::Result IsPathValid::execute(Agent *)
 {
 	return Result();
 }
