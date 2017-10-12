@@ -9,14 +9,9 @@
 
 class GoalTree {
 public:
-	static GoalTree& get() {
-		return instance;
-	}
 	Task::Result execute(Agent*);
+	GoalTree();
 private:
 	static GoalTree instance;
-	GoalTree();
-	GoalTree(GoalTree&) = delete;
-	GoalTree& operator=(GoalTree&) = delete;
 	Selector entry;
 };
