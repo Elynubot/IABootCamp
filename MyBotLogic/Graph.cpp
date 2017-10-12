@@ -58,10 +58,12 @@ void Graph::updateConnectorsWithType(const std::map<unsigned int, TileInfo>& til
 			vector<Connector>* connectors{ node.getConnectors() };
 			for_each(connectors->begin(), connectors->end(), [&](Connector& connector) {
 				Connector* c1 = connector.getEndNode()->getConnector(connector.getBeginNode());
-				c1->setIsToDestroy(true);
-				invalidConnectors.push_back(c1);
+				if (c1 != nullptr) {
+					c1->setIsToDestroy(true);
+					invalidConnectors.push_back(Connector{ *c1 });
+				}
 				connector.setIsToDestroy(true);
-				invalidConnectors.push_back(&connector);
+				invalidConnectors.push_back(Connector{ connector });
 			});
 		}
 	});
@@ -70,17 +72,22 @@ void Graph::updateConnectorsWithObjects(const std::map<unsigned int, ObjectInfo>
 	for_each(objects.begin(), objects.end(), [&](const std::pair<unsigned int, ObjectInfo>& object) {
 		const std::set<Object::EObjectType>& objectTypes = object.second.objectTypes;
 		if ((objectTypes.find(Object::ObjectType_Wall) != objectTypes.end()) || (objectTypes.find(Object::ObjectType_Window) != objectTypes.end())) {
-			Connector* c1 = nodes[object.second.objectID].getConnector(object.second.position);
-			c1->setIsToDestroy(true);
-			invalidConnectors.push_back(c1);
-			Connector* c2 = c1->getEndNode()->getConnector(c1->getBeginNode());
-			c2->setIsToDestroy(true);
-			invalidConnectors.push_back(c2);
+			Connector* c1 = nodes[object.second.tileID].getConnector(object.second.position);
+			if ((c1 != nullptr) && (c1->getIsToDestroy() == false)) {
+				c1->setIsToDestroy(true);
+				invalidConnectors.push_back(Connector{ *c1 });
+				Connector* c2 = c1->getEndNode()->getConnector(c1->getBeginNode());
+				if ((c2 != nullptr) && (c2->getIsToDestroy() == false)) {
+					c2->setIsToDestroy(true);
+					invalidConnectors.push_back(Connector{ *c2 });
+				}
+			}
 		}		
 	});
 }
 
 void Graph::update(const map<unsigned int, TileInfo>& tiles, const std::map<unsigned int, ObjectInfo>& objects) noexcept {
+	updateNodesType(tiles);
 	updateConnectorsWithType(tiles);
 	updateConnectorsWithObjects(objects);
 }
@@ -268,7 +275,8 @@ vector<int> Graph::getGoalPosition() const noexcept
 }
 
 void Graph::popInvalidConnectors() noexcept {
-	for_each(invalidConnectors.begin(), invalidConnectors.end(), [&](Connector* connector) {
-		connector->getBeginNode()->popConnector(connector->getEndNode());
+	for_each(invalidConnectors.begin(), invalidConnectors.end(), [&](Connector connector) {
+		connector.getBeginNode()->popConnector(connector.getEndNode());
 	});
+	invalidConnectors.clear();
 }

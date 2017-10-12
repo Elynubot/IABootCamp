@@ -22,7 +22,7 @@ void GameManager::start(LevelInfo & _levelInfo)
 		Sleep(1000);
 	}*/
 	graph.init(_levelInfo.rowCount, _levelInfo.colCount, _levelInfo.tiles, _levelInfo.objects);
-	for (auto npc : _levelInfo.npcs)
+	for (const auto& npc : _levelInfo.npcs)
 	{
 		Agent * ag = new Agent(npc.second.npcID);
 		ag->setPos(npc.second.tileID);

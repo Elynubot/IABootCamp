@@ -20,22 +20,21 @@ void Node::addConnector(Tile::ETilePosition dir, Node * obj) noexcept {
 
 void Node::popConnector(Node * obj) noexcept {
 	//Pop target obj in connectors
-	int i{};
-	while (i < connectors.size()) {
-		if (connectors[i].getEndNodeC() == obj) {
-			connectors.erase(connectors.begin() + i);
-			break;
-		}
-		++i;
+	auto it = find_if(connectors.begin(), connectors.end(), [&](const Connector& connector) {
+		return (*connector.getEndNode() == *obj);
+	});
+	if (it != connectors.end()) {
+		connectors.erase(it);
 	}
 }
 
 Connector* Node::getConnector(Node * obj) noexcept {
 	int i{};
 	while (i < connectors.size()) {
-		if (connectors[i].getEndNodeC() == obj) {
+		if (*connectors[i].getEndNodeC() == *obj) {
 			return &connectors[i];
 		}
+		++i;
 	}
 	return nullptr;
 }
@@ -47,6 +46,7 @@ Connector* Node::getConnector(Tile::ETilePosition dir) noexcept {
 		if (connectors[i].getDirection() == dir) {
 			return &connectors[i];
 		}
+		++i;
 	}
 	return nullptr;
 }
