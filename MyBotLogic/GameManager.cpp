@@ -56,6 +56,11 @@ void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList
 {
 	for (Agent& agent : agents)
 	{
+		agent.makeDecisions();
+	}
+
+	for (Agent& agent : agents)
+	{
 		agent.stateChange(_turnInfo);
 	}
 
@@ -63,4 +68,5 @@ void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList
 	{
 		_actionList.push_back(agent.play(_turnInfo));
 	}
+	newGoalFound = false;
 }
