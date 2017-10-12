@@ -1,8 +1,8 @@
 #include "WaitState.h"
 #include "../Agent.h"
 #include "../MyBotLogic.h"
-#include "../Context.h"
-
+#include "../GameManager.h"
+#include <algorithm>
 #include "MoveState.h"
 
 WaitState WaitState::instance;
@@ -18,14 +18,13 @@ State * WaitState::get()
 
 State * WaitState::getTransition(TurnInfo & _turnInfo, Agent * agent)
 {
-	Graph graph = Context::get().getGraph();
+	Graph graph = GameManager::get().getGraph();
 	bool found = false;
-	for (Agent * ag : Context::get().getAgents())
-	{
+	for_each(GameManager::get().getBeginAgent(), GameManager::get().getEndAgent(), [&](Agent * ag) {
 		if (ag->getId() != agent->getId() && ag->getPosAtTurn(_turnInfo.turnNb + 1) == agent->getPosAtTurn(_turnInfo.turnNb + 1) && (graph.dist(agent->getPos(), agent->getGoal()) < graph.dist(ag->getPos(), ag->getGoal()) || (graph.dist(agent->getPos(), agent->getGoal()) == graph.dist(ag->getPos(), ag->getGoal()) && agent->getId() > ag->getId()))) {
 			found = true;
 		}
-	}
+	});
 	if (found || agent->getPos() == agent->getGoal()) {
 		return nullptr;
 	}

@@ -1,15 +1,21 @@
 #include "State.h"
-#include "Context.h"
+#include "GameManager.h"
 
 #include "windows.h"
 
-Context Context::instance;
+GameManager GameManager::instance;
 
-Context::Context()
+GameManager::GameManager()
 {
 }
 
-void Context::start(LevelInfo & _levelInfo)
+GameManager::~GameManager()
+{
+	for_each(getBeginAgent(), getEndAgent(), [](Agent* ag) { delete(ag); });
+}
+
+
+void GameManager::start(LevelInfo & _levelInfo)
 {
 	/*bool debug = true;
 	while (debug) {
@@ -20,7 +26,7 @@ void Context::start(LevelInfo & _levelInfo)
 	{
 		Agent * ag = new Agent(npc.second.npcID);
 		ag->setPos(npc.second.tileID);
-		agents.push_back(ag);
+		agents.push(ag);
 	}
 	vector<int> goals = graph.getGoalPosition();
 	vector<bool> taken;
@@ -52,14 +58,13 @@ void Context::start(LevelInfo & _levelInfo)
 	}
 }
 
-void Context::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList)
+void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList)
 {
-	for (Agent * agent : agents)
-	{
-		agent->stateChange(_turnInfo);
-	}
-	for (Agent * agent : agents)
-	{
+
+	for_each(agents.begin(), agents.end(), [&_turnInfo](Agent * agent) {
+		agent->stateChange(_turnInfo); 
+	});
+	for_each(agents.begin(), agents.end(), [&_turnInfo, &_actionList](Agent * agent) {
 		_actionList.push_back(agent->Play(_turnInfo));
-	}
+	});
 }
