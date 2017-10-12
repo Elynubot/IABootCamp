@@ -80,7 +80,6 @@ SET( AIBOT_SRC
 	MyBotLogic/Connector.cpp
 	MyBotLogic/State.cpp
 	MyBotLogic/Context.cpp
-	MyBotLogic/Utility.h
 	
 	MyBotLogic/State/WaitState.cpp
 	MyBotLogic/State/MoveState.cpp
