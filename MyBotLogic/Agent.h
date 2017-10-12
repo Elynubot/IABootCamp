@@ -49,6 +49,12 @@ public:
 			return pos;
 		}
 	}
+	const vector<int>& getForbiddens() {
+		return forbidden;
+	}
+	void addForbidden(int id) {
+		forbidden.push_back(id);
+	}
 	Agent(int agentId);
 	void makeDecisions();
 	Action * play(TurnInfo& _turnInfo);
