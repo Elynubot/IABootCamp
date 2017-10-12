@@ -49,6 +49,7 @@ SET( AIBOT_HEADERS
 	MyBotLogic/Connector.h
 	MyBotLogic/State.h
 	MyBotLogic/Context.h
+	MyBotLogic/Utility.h
 	
 	MyBotLogic/State/WaitState.h
 	MyBotLogic/State/MoveState.h
@@ -79,6 +80,7 @@ SET( AIBOT_SRC
 	MyBotLogic/Connector.cpp
 	MyBotLogic/State.cpp
 	MyBotLogic/Context.cpp
+	MyBotLogic/Utility.h
 	
 	MyBotLogic/State/WaitState.cpp
 	MyBotLogic/State/MoveState.cpp

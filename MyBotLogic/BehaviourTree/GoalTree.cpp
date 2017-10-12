@@ -4,7 +4,7 @@ GoalTree GoalTree::instance;
 
 Task::Result GoalTree::execute(Agent * ag)
 {
-	entry.execute(ag);
+	return entry.execute(ag);
 }
 
 GoalTree::GoalTree()

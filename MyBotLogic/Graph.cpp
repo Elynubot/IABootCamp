@@ -1,15 +1,7 @@
 #include "Graph.h"
 #include <algorithm>
+#include "Utility.h"
 
-//CHANGE POSITION TO NEW FILE
-#include <queue>
-//According to @skypjack https://stackoverflow.com/questions/41904374/priority-queues-in-c
-template<class T, class C = std::vector<T>, class P = std::less<typename C::value_type> >
-struct MyPriorityQueue : std::priority_queue<T, C, P> {
-	typename C::iterator begin() { return std::priority_queue<T, C, P>::c.begin(); }
-	typename C::iterator end() { return std::priority_queue<T, C, P>::c.end(); }
-};
-//END CHANGE POSITION TO NEW FILE
 
 int Graph::getPositionId(int x, int y) const noexcept {
 	if ((x >= 0) && (x < colCount*2) && (y >= 0) && (y < rowCount))
