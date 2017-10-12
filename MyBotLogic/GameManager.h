@@ -6,19 +6,19 @@
 #include "Graph.h"
 #include "Agent.h"
 
-class Context {
+class GameManager {
 private:
-	static Context instance;
+	static GameManager instance;
 
 	Graph graph;
 	vector<Agent *> agents;
 
-	Context();
-	Context(Context&) = delete;
-	Context& operator=(Context&) = delete;
+	GameManager();
+	GameManager(GameManager&) = delete;
+	GameManager& operator=(GameManager&) = delete;
 
 public:
-	static Context& get() {
+	static GameManager& get() {
 		return instance;
 	}
 

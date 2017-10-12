@@ -1,15 +1,15 @@
 #include "State.h"
-#include "Context.h"
+#include "GameManager.h"
 
 #include "windows.h"
 
-Context Context::instance;
+GameManager GameManager::instance;
 
-Context::Context()
+GameManager::GameManager()
 {
 }
 
-void Context::start(LevelInfo & _levelInfo)
+void GameManager::start(LevelInfo & _levelInfo)
 {
 	/*bool debug = true;
 	while (debug) {
@@ -52,7 +52,7 @@ void Context::start(LevelInfo & _levelInfo)
 	}
 }
 
-void Context::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList)
+void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList)
 {
 	for (Agent * agent : agents)
 	{

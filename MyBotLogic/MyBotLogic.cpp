@@ -2,7 +2,7 @@
 
 #include "TurnInfo.h"
 #include "NPCInfo.h"
-#include "Context.h"
+#include "GameManager.h"
 
 #include "windows.h"
 
@@ -35,7 +35,7 @@ MyBotLogic::MyBotLogic()
 
 /*virtual*/ void MyBotLogic::Init(LevelInfo& _levelInfo)
 {
-	Context::get().start(_levelInfo);
+	GameManager::get().start(_levelInfo);
 }
 
 /*virtual*/ void MyBotLogic::OnGameStarted()
@@ -45,7 +45,7 @@ MyBotLogic::MyBotLogic()
 
 /*virtual*/ void MyBotLogic::FillActionList(TurnInfo& _turnInfo, std::vector<Action*>& _actionList)
 {
-	Context::get().update(_turnInfo, _actionList);
+	GameManager::get().update(_turnInfo, _actionList);
 }
 
 /*virtual*/ void MyBotLogic::Exit()
