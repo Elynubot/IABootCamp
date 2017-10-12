@@ -1,7 +1,5 @@
 #include "GoalTree.h"
 
-GoalTree GoalTree::instance;
-
 Task::Result GoalTree::execute(Agent * ag)
 {
 	return entry.execute(ag);
