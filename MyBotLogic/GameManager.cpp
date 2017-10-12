@@ -21,7 +21,7 @@ void GameManager::start(LevelInfo & _levelInfo)
 	while (debug) {
 		Sleep(1000);
 	}*/
-	graph.init(_levelInfo.rowCount, _levelInfo.colCount, _levelInfo.tiles);
+	graph.init(_levelInfo.rowCount, _levelInfo.colCount, _levelInfo.tiles, _levelInfo.objects);
 	for (auto npc : _levelInfo.npcs)
 	{
 		Agent * ag = new Agent(npc.second.npcID);

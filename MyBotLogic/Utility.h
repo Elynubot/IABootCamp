@@ -1,5 +1,7 @@
 #pragma once
 #include <queue>
+#include <vector>
+#include <algorithm>
 
 //According to @skypjack https://stackoverflow.com/questions/41904374/priority-queues-in-c
 template<class T, class C = std::vector<T>, class P = std::less<typename C::value_type> >

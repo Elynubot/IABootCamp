@@ -25,6 +25,7 @@ private:
 				return (_lagent->getPath().size() < _ragent->getPath().size());
 		}
 	};
+
 	MyPriorityQueue<Agent*, std::vector<Agent*>, GameManager::AgentPtrComparison> agents;
 
 	GameManager();

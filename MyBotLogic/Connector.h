@@ -8,6 +8,7 @@ private:
 	Node * beginNode;
 	Node * endNode;
 	Tile::ETilePosition direction;
+	bool isToDestroy;
 public:
 	Connector(Node * begin, Node * end, Tile::ETilePosition direction);
 	const Node * getBeginNodeC() const noexcept {
@@ -27,5 +28,11 @@ public:
 	}
 	Tile::ETilePosition getInvertDirection() const noexcept {
 		return (Tile::ETilePosition) ((direction + 3) % 6) ;
+	}
+	bool getIsToDestroy() {
+		return isToDestroy;
+	}
+	void setIsToDestroy(bool _isToDestroy) {
+		isToDestroy = _isToDestroy;
 	}
 };

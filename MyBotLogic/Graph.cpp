@@ -2,7 +2,6 @@
 #include <algorithm>
 #include "Utility.h"
 
-
 int Graph::getPositionId(int x, int y) const noexcept {
 	if ((x >= 0) && (x < colCount*2) && (y >= 0) && (y < rowCount))
 		return x / 2 + colCount * y;
@@ -17,15 +16,14 @@ void Graph::tryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) n
 }
 
 //Create the nodes without their connectors with the Node constructor
-void Graph::createNodes(const map<unsigned int, TileInfo>& tiles) noexcept {
-	nodes.resize(tiles.size());
-	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
-		nodes[tile.second.tileID] = Node(tile.second, colCount);
-	});
+void Graph::createNodes() noexcept {
+	for (int i = 0; i < colCount * rowCount; ++i) {
+		nodes.push_back(Node{ (unsigned int) i, colCount });
+	}
 }
 
 //Create the connectors for each accessible neighbours for each node
-void Graph::createConnectors(const map<unsigned int, TileInfo>& tiles) noexcept {
+void Graph::createConnectors() noexcept {
 	for_each(nodes.begin(), nodes.end(), [&](Node& node) {
 		int x{ node.getX() };
 		int y{ node.getY() };
@@ -38,43 +36,53 @@ void Graph::createConnectors(const map<unsigned int, TileInfo>& tiles) noexcept 
 	});
 }
 
-void Graph::init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles) {
+void Graph::init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles, const std::map<unsigned int, ObjectInfo>& objects) noexcept {
 	rowCount = _rowCount;
 	colCount = _colCount;
-	createNodes(tiles);
-	createConnectors(tiles);
+	createNodes();
+	createConnectors();
+	update(tiles, objects);
+	popInvalidConnectors();
 }
 
-void Graph::update(const map<unsigned int, TileInfo>& tiles) noexcept {
-	for_each(tiles.begin(), tiles.end(), [&](const pair<unsigned int, TileInfo>& tile) {
-		Node& node = nodes[tile.second.tileID];
-		if ((node.getType() == Tile::TileAttribute_Forbidden) && (tile.second.tileType != Tile::TileAttribute_Forbidden)) {
-			int x{ node.getX() };
-			int y{ node.getY() };
-			//Create new connectors for the node
-			tryAddConnector(node, Tile::NW, x - 1, y - 1);
-			tryAddConnector(node, Tile::NE, x + 1, y - 1);
-			tryAddConnector(node, Tile::W, x - 2, y);
-			tryAddConnector(node, Tile::E, x + 2, y);
-			tryAddConnector(node, Tile::SW, x - 1, y + 1);
-			tryAddConnector(node, Tile::SE, x + 1, y + 1);
-			//Create new connectors for the neighbours of the node
-			vector<Connector>* connectors{ node.getConnectors() };
-			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
-				connector.getEndNode()->addConnector(connector.getInvertDirection(), connector.getBeginNode());
-			});
-		}
-		else if ((node.getType() != Tile::TileAttribute_Forbidden) && (tile.second.tileType == Tile::TileAttribute_Forbidden)) {
-			//Pop old connectors for the neighbours of the node
-			vector<Connector>* connectors{ node.getConnectors() };
-			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
-				connector.getEndNode()->popConnector(connector.getBeginNode());
-			});
-			//Clear connectors for the node
-			node.clearConnectors();
-		}
-		node.setType(tile.second.tileType);
+void Graph::updateNodesType(const std::map<unsigned int, TileInfo>& tiles) noexcept {
+	for_each(tiles.begin(), tiles.end(), [&](const std::pair<unsigned int, TileInfo>& tile) {
+		nodes[tile.second.tileID].setType(tile.second.tileType);
 	});
+}
+
+void Graph::updateConnectorsWithType(const std::map<unsigned int, TileInfo>& tiles) noexcept {
+	for_each(tiles.begin(), tiles.end(), [&](const std::pair<unsigned int, TileInfo>& tile) {
+		Node& node = nodes[tile.second.tileID];
+		if (node.getType() == Tile::TileAttribute_Forbidden) {
+			vector<Connector>* connectors{ node.getConnectors() };
+			for_each(connectors->begin(), connectors->end(), [&](Connector& connector) {
+				Connector* c1 = connector.getEndNode()->getConnector(connector.getBeginNode());
+				c1->setIsToDestroy(true);
+				invalidConnectors.push_back(c1);
+				connector.setIsToDestroy(true);
+				invalidConnectors.push_back(&connector);
+			});
+		}
+	});
+}
+void Graph::updateConnectorsWithObjects(const std::map<unsigned int, ObjectInfo>& objects) noexcept {
+	for_each(objects.begin(), objects.end(), [&](const std::pair<unsigned int, ObjectInfo>& object) {
+		const std::set<Object::EObjectType>& objectTypes = object.second.objectTypes;
+		if ((objectTypes.find(Object::ObjectType_Wall) != objectTypes.end()) || (objectTypes.find(Object::ObjectType_Window) != objectTypes.end())) {
+			Connector* c1 = nodes[object.second.objectID].getConnector(object.second.position);
+			c1->setIsToDestroy(true);
+			invalidConnectors.push_back(c1);
+			Connector* c2 = c1->getEndNode()->getConnector(c1->getBeginNode());
+			c2->setIsToDestroy(true);
+			invalidConnectors.push_back(c2);
+		}		
+	});
+}
+
+void Graph::update(const map<unsigned int, TileInfo>& tiles, const std::map<unsigned int, ObjectInfo>& objects) noexcept {
+	updateConnectorsWithType(tiles);
+	updateConnectorsWithObjects(objects);
 }
 
 class Graph::HeuristicManhattan {
@@ -259,3 +267,8 @@ vector<int> Graph::getGoalPosition() const noexcept
 	return result;
 }
 
+void Graph::popInvalidConnectors() noexcept {
+	for_each(invalidConnectors.begin(), invalidConnectors.end(), [&](Connector* connector) {
+		connector->getBeginNode()->popConnector(connector->getEndNode());
+	});
+}
