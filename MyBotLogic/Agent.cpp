@@ -8,7 +8,12 @@ Agent::Agent(int agentId)
 	currState = MoveState::get();
 }
 
-Action * Agent::Play(TurnInfo& _turnInfo)
+void Agent::makeDecisions()
+{
+	decision.execute(this);
+}
+
+Action * Agent::play(TurnInfo& _turnInfo)
 {
 	return currState->onUpdate(_turnInfo, this);
 }

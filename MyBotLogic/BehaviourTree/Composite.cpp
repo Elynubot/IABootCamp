@@ -1,6 +1,7 @@
 #include "Composite.h"
+#include "../Agent.h"
 
-void Composite::addChild(unique_ptr<Task> child)
+void Composite::addChild(Task* child)
 {
-	children.push_back(std::move(child));
+	children.push_back(child);
 }

@@ -20,9 +20,9 @@ State * MoveState::getTransition(TurnInfo & _turnInfo, Agent * agent)
 {
 	Graph graph = GameManager::get().getGraph();
 	bool found = false;
-	for (Agent * ag : GameManager::get().getAgents())
+	for (Agent ag : GameManager::get().getAgents())
 	{
-		if (ag->getId() != agent->getId() && ag->getPosAtTurn(_turnInfo.turnNb + 1) == agent->getPosAtTurn(_turnInfo.turnNb + 1) && (graph.dist(agent->getPos(), agent->getGoal()) < graph.dist(ag->getPos(), ag->getGoal()) || (graph.dist(agent->getPos(), agent->getGoal()) == graph.dist(ag->getPos(), ag->getGoal()) && agent->getId() > ag->getId()))) {
+		if (ag.getId() != agent->getId() && ag.getNextPos() == agent->getNextPos() && (graph.dist(agent->getPos(), agent->getGoal()) < graph.dist(ag.getPos(), ag.getGoal()) || (graph.dist(agent->getPos(), agent->getGoal()) == graph.dist(ag.getPos(), ag.getGoal()) && agent->getId() > ag.getId()))) {
 			found = true;
 		}
 	}
@@ -40,8 +40,10 @@ void MoveState::onEnter(Agent * agent)
 
 Action * MoveState::onUpdate(TurnInfo& _turnInfo, Agent * agent)
 {
-	agent->setPos(agent->getPosAtTurn(_turnInfo.turnNb+1));
-	return new Move(agent->getId(), agent->getPath()[_turnInfo.turnNb -agent->getWaited() -1]->getDirection());
+	agent->setPos(agent->getNextPos());
+	Action * result = new Move(agent->getId(), agent->getPath().back()->getDirection());
+	agent->getPath().pop_back();
+	return result;
 }
 
 void MoveState::onExit(Agent * agent)

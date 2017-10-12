@@ -5,6 +5,7 @@
 #include "TurnInfo.h"
 #include "State.h"
 #include "Node.h"
+#include "BehaviourTree/GoalTree.h"
 
 using namespace std;
 
@@ -13,17 +14,11 @@ private:
 	int id;
 	int goal;
 	int pos;
-	int nbTurnPassed = 0;
+	GoalTree decision;
 	vector<const Connector *> path;
 	State * currState;
 
 public:
-	int getWaited() {
-		return nbTurnPassed;
-	}
-	void waitTurn() {
-		nbTurnPassed++;
-	}
 	int getId() {
 		return id;
 	}
@@ -45,15 +40,16 @@ public:
 	vector<const Connector *>& getPath() {
 		return path;
 	}
-	int getPosAtTurn(int turn) {
-		if (turn - nbTurnPassed - 1 < path.size()) {
-			return path[turn - nbTurnPassed - 1]->getBeginNodeC()->getId();
+	int getNextPos() {
+		if (path.size() > 0) {
+			return path.back()->getEndNode()->getId();
 		}
 		else {
-			return path[path.size() - 1]->getEndNodeC()->getId();
+			return pos;
 		}
 	}
 	Agent(int agentId);
-	Action * Play(TurnInfo& _turnInfo);
+	void makeDecisions();
+	Action * play(TurnInfo& _turnInfo);
 	void stateChange(TurnInfo& _turnInfo);
 };

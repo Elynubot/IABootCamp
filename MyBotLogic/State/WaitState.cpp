@@ -20,9 +20,9 @@ State * WaitState::getTransition(TurnInfo & _turnInfo, Agent * agent)
 {
 	Graph graph = GameManager::get().getGraph();
 	bool found = false;
-	for (Agent * ag : GameManager::get().getAgents())
+	for (Agent ag : GameManager::get().getAgents())
 	{
-		if (ag->getId() != agent->getId() && ag->getPosAtTurn(_turnInfo.turnNb + 1) == agent->getPosAtTurn(_turnInfo.turnNb + 1) && (graph.dist(agent->getPos(), agent->getGoal()) < graph.dist(ag->getPos(), ag->getGoal()) || (graph.dist(agent->getPos(), agent->getGoal()) == graph.dist(ag->getPos(), ag->getGoal()) && agent->getId() > ag->getId()))) {
+		if (ag.getId() != agent->getId() && ag.getNextPos() == agent->getNextPos() && (graph.dist(agent->getPos(), agent->getGoal()) < graph.dist(ag.getPos(), ag.getGoal()) || (graph.dist(agent->getPos(), agent->getGoal()) == graph.dist(ag.getPos(), ag.getGoal()) && agent->getId() > ag.getId()))) {
 			found = true;
 		}
 	}
@@ -40,7 +40,6 @@ void WaitState::onEnter(Agent * agent)
 
 Action * WaitState::onUpdate(TurnInfo& _turnInfo, Agent * agent)
 {
-	agent->waitTurn();
 	return new Move(agent->getId(), Tile::CENTER);
 }
 

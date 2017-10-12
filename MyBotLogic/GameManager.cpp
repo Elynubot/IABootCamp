@@ -18,8 +18,8 @@ void GameManager::start(LevelInfo & _levelInfo)
 	graph.init(_levelInfo.rowCount, _levelInfo.colCount, _levelInfo.tiles);
 	for (auto npc : _levelInfo.npcs)
 	{
-		Agent * ag = new Agent(npc.second.npcID);
-		ag->setPos(npc.second.tileID);
+		Agent ag{(int)npc.second.npcID };
+		ag.setPos(npc.second.tileID);
 		agents.push_back(ag);
 	}
 	vector<int> goals = graph.getGoalPosition();
@@ -28,38 +28,39 @@ void GameManager::start(LevelInfo & _levelInfo)
 	{
 		taken.push_back(false);
 	}
-	for (Agent * agent : agents)
+	for (Agent& agent : agents)
 	{
 		int minDist = -1;
 		int minId = -1;
 		for (int i = 0; i < goals.size(); i++) {
 			if (!taken[i]) {
-				if (minDist == -1 || graph.dist(agent->getPos(), goals[i]) < minDist) {
+				if (minDist == -1 || graph.dist(agent.getPos(), goals[i]) < minDist) {
 					if (minId != -1) {
 						taken[minId] = false;
 					}
 					minId = i;
-					minDist = graph.dist(agent->getPos(), goals[i]);
+					minDist = graph.dist(agent.getPos(), goals[i]);
 					taken[minId] = true;
 				}
 			}
 		}
-		agent->setGoal(goals[minId]);
+		agent.setGoal(goals[minId]);
 	}
-	for (Agent * agent : agents)
+	for (Agent& agent : agents)
 	{
-		agent->setPath(graph.getPath(agent->getPos(), agent->getGoal()));
+		agent.setPath(graph.getPath(agent.getPos(), agent.getGoal()));
 	}
 }
 
 void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList)
 {
-	for (Agent * agent : agents)
+	for (Agent& agent : agents)
 	{
-		agent->stateChange(_turnInfo);
+		agent.stateChange(_turnInfo);
 	}
-	for (Agent * agent : agents)
+
+	for (Agent& agent : agents)
 	{
-		_actionList.push_back(agent->Play(_turnInfo));
+		_actionList.push_back(agent.play(_turnInfo));
 	}
 }

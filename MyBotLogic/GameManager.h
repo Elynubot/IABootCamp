@@ -11,7 +11,7 @@ private:
 	static GameManager instance;
 
 	Graph graph;
-	vector<Agent *> agents;
+	vector<Agent> agents;
 
 	GameManager();
 	GameManager(GameManager&) = delete;
@@ -21,8 +21,7 @@ public:
 	static GameManager& get() {
 		return instance;
 	}
-
-	vector<Agent *>& getAgents() {
+	vector<Agent>& getAgents() {
 		return agents;
 	}
 	Graph& getGraph() {

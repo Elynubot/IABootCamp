@@ -1,4 +1,5 @@
 #include "Sequence.h"
+#include "../Agent.h"
 
 Task::Result Sequence::execute(Agent * ag)
 {

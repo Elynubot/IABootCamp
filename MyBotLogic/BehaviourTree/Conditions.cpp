@@ -1,4 +1,5 @@
 #include "Conditions.h"
+#include "../Agent.h"
 
 Task::Result IsGoalReached::execute(Agent *)
 {
