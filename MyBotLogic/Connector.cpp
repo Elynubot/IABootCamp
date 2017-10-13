@@ -5,5 +5,6 @@ Connector::Connector(Node * _beginNode, Node * _endNode, Tile::ETilePosition _di
 	: beginNode{ _beginNode }
 	, endNode{ _endNode }
 	, direction{ _direction }
+	, isToDestroy { false }
 {
 }

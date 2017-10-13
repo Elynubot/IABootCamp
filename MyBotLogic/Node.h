@@ -17,7 +17,7 @@ private:
 	
 public:
 	Node() = default;
-	Node(const TileInfo& tileInfo, int colCount) noexcept;
+	Node(unsigned int tileId, int colCount) noexcept;
 
 	int getX() const noexcept {
 		return x;
@@ -47,8 +47,10 @@ public:
 		return getType() == Tile::TileAttribute_Goal;
 	}
 
-	void addConnector(Tile::ETilePosition dir, Node * obj);
-	void popConnector(Node * obj);
+	void addConnector(Tile::ETilePosition dir, Node * obj) noexcept;
+	void popConnector(Node * obj) noexcept;
+	Connector* getConnector(Node * obj) noexcept;
+	Connector* getConnector(Tile::ETilePosition dir) noexcept;
 
 	friend bool operator==(const Node& l, const Node& r) noexcept {
 		return (l.getId() == r.getId());

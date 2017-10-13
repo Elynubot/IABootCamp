@@ -2,6 +2,7 @@
 
 #include "Node.h"
 #include <map>
+#include "TurnInfo.h"
 
 using namespace std;
 
@@ -11,7 +12,7 @@ private:
 	int rowCount;
 	int colCount;
 	vector<Node> nodes;
-
+	vector<Connector> invalidConnectors;
 private:
 	Node& getNode(int id) noexcept {
 		return nodes[id];
@@ -22,14 +23,19 @@ private:
 	void tryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) noexcept;
 
 	//Create the nodes without their connectors with the Node constructor
-	void createNodes(const map<unsigned int, TileInfo>& tiles) noexcept;
+	void createNodes() noexcept;
 	//Create the connectors for each accessible neighbours for each node
-	void createConnectors(const map<unsigned int, TileInfo>& tiles) noexcept;
-
+	void createConnectors() noexcept;
+	//Update nodes
+	void updateNodesType(const std::map<unsigned int, TileInfo>& tiles) noexcept;
+	//Update connectors
+	void updateConnectorsWithType(const std::map<unsigned int, TileInfo>& tiles) noexcept;
+	void updateConnectorsWithObjects(const std::map<unsigned int, ObjectInfo>& objects) noexcept;
 public:
-	void init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles);
+	void init(int _rowCount, int _colCount, const std::map<unsigned int, TileInfo>& tiles, const std::map<unsigned int, ObjectInfo>& objects) noexcept;
 
-	void update(const map<unsigned int, TileInfo>& tiles) noexcept;
+	//Mets à jour les infos des tiles et invalide les connectors à invalider
+	void update(const map<unsigned int, TileInfo>& tiles, const std::map<unsigned int, ObjectInfo>& objects) noexcept;
 	
 private:
 	class HeuristicManhattan;
@@ -44,6 +50,11 @@ public:
 		const Node* node2{ &nodes[n2] };
 		return (abs(node1->getX() - node2->getX()) + abs(node1->getY() - node2->getY()));
 	}
+	const vector<Connector>& getInvalidConnectors() const noexcept {
+		return invalidConnectors;
+	}
+	void popInvalidConnectors() noexcept;
+
 };
 
 

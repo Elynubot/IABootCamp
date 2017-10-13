@@ -20,12 +20,11 @@ State * MoveState::getTransition(TurnInfo & _turnInfo, Agent * agent)
 {
 	Graph graph = GameManager::get().getGraph();
 	bool found = false;
-	for (Agent ag : GameManager::get().getAgents())
-	{
-		if (ag.getId() != agent->getId() && ag.getNextPos() == agent->getNextPos() && (graph.dist(agent->getPos(), agent->getGoal()) < graph.dist(ag.getPos(), ag.getGoal()) || (graph.dist(agent->getPos(), agent->getGoal()) == graph.dist(ag.getPos(), ag.getGoal()) && agent->getId() > ag.getId()))) {
+	for_each(GameManager::get().getBeginAgent(), GameManager::get().getEndAgent(), [&](Agent * ag) {
+		if (ag->getId() != agent->getId() && ag->getNextPos() == agent->getNextPos() && (graph.dist(agent->getPos(), agent->getGoal()) < graph.dist(ag->getPos(), ag->getGoal()) || (graph.dist(agent->getPos(), agent->getGoal()) == graph.dist(ag->getPos(), ag->getGoal()) && agent->getId() > ag->getId()))) {
 			found = true;
 		}
-	}
+	});
 	if (found || agent->getPos() == agent->getGoal()) {
 		return WaitState::get();
 	}
