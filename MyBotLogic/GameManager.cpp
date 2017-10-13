@@ -17,10 +17,6 @@ GameManager::~GameManager()
 
 void GameManager::start(LevelInfo & _levelInfo)
 {
-	/*bool debug = true;
-	while (debug) {
-		Sleep(1000);
-	}*/
 	graph.init(_levelInfo.rowCount, _levelInfo.colCount, _levelInfo.tiles, _levelInfo.objects);
 	for (const auto& npc : _levelInfo.npcs)
 	{

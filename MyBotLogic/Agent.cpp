@@ -1,16 +1,17 @@
 #include "Agent.h"
 #include "State/MoveState.h"
 #include "State/WaitState.h"
+#include "LogicManager.h"
 
 Agent::Agent(int agentId)
 {
 	id = agentId;
-	currState = MoveState::get();
+	currState = &LogicManager::get().getMoveState();
 }
 
 void Agent::makeDecisions()
 {
-	decision.execute(this);
+	LogicManager::get().getDecisionTree().execute(this);
 }
 
 Action * Agent::play(TurnInfo& _turnInfo)

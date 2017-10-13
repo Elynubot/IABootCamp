@@ -14,7 +14,6 @@ private:
 	int id;
 	int goal;
 	int pos;
-	GoalTree decision;
 	vector<const Connector *> path;
 	vector<int> forbidden;
 	State * currState;

@@ -2,18 +2,12 @@
 #include "../Agent.h"
 #include "../MyBotLogic.h"
 #include "../GameManager.h"
+#include "../LogicManager.h"
 
 #include "WaitState.h"
 
-MoveState MoveState::instance;
-
 MoveState::MoveState()
 {
-}
-
-State * MoveState::get()
-{
-	return &instance;
 }
 
 State * MoveState::getTransition(TurnInfo & _turnInfo, Agent * agent)
@@ -26,7 +20,7 @@ State * MoveState::getTransition(TurnInfo & _turnInfo, Agent * agent)
 		}
 	});
 	if (found || agent->getPos() == agent->getGoal()) {
-		return WaitState::get();
+		return &LogicManager::get().getWaitState();
 	}
 	else {
 		return nullptr;

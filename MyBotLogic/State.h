@@ -5,11 +5,6 @@
 
 class Agent;
 class State {
-protected:
-	State() = default;
-private:
-	State(State&) = delete;
-	State& operator=(State&) = delete;
 public:
 	virtual State * getTransition(TurnInfo& _turnInfo, Agent * agent)=0;
 	virtual void onEnter(Agent * agent)=0;

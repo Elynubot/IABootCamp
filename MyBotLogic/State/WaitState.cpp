@@ -2,18 +2,12 @@
 #include "../Agent.h"
 #include "../MyBotLogic.h"
 #include "../GameManager.h"
+#include "../LogicManager.h"
 #include <algorithm>
 #include "MoveState.h"
 
-WaitState WaitState::instance;
-
 WaitState::WaitState()
 {
-}
-
-State * WaitState::get()
-{
-	return &instance;
 }
 
 State * WaitState::getTransition(TurnInfo & _turnInfo, Agent * agent)
@@ -29,7 +23,7 @@ State * WaitState::getTransition(TurnInfo & _turnInfo, Agent * agent)
 		return nullptr;
 	}
 	else {
-		return MoveState::get();
+		return &LogicManager::get().getMoveState();
 	}
 }
 
