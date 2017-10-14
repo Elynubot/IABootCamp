@@ -44,6 +44,8 @@ public:
 		const Node* node2{ &nodes[n2] };
 		return (abs(node1->getX() - node2->getX()) + abs(node1->getY() - node2->getY()));
 	}
+
+	vector<const Connector*> Graph::getBestUnkown(int startId);
 };
 
 

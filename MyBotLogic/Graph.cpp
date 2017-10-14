@@ -171,7 +171,7 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 
 				//if we didn't find a shorter route, skip
 				if (neighbourRecord->costSoFar <= neighbourNodeCost)
-					continue; //jump to the end of the looop
+					continue; //jump to the end of the loop
 
 							  //otherwise remove it from the closed list
 				closedList.erase(neighbourRecordClose);
@@ -257,5 +257,92 @@ vector<int> Graph::getGoalPosition() const noexcept
 			result.push_back(node.getId());
 	});
 	return result;
+}
+
+
+vector<const Connector*> Graph::getBestUnkown(int startId) {
+	Node* start{ &getNode(startId) };
+
+	NodeItem *startRecord = new NodeItem{};
+	startRecord->ptr = start;
+	startRecord->previous = nullptr;
+	startRecord->connector = nullptr;
+	startRecord->costSoFar = 0;
+
+	vector<NodeItem*> closedList;
+	MyPriorityQueue<NodeItem*, std::vector<NodeItem*>, NodeItemPtrComparison> openList;
+
+	openList.push(startRecord);
+	NodeItem* current;
+	//Iterate through processing each node
+	while (openList.size() > 0) {
+		current = openList.top();
+		openList.pop();
+		
+		//If it is an unknown node, then terminate
+		if (current->ptr->getType() == Tile::ETileType::TileAttribute_Unknown) {
+			break;
+		}
+
+		vector<Connector>* connections = current->ptr->getConnectors();
+		NodeItem* connectionRecord;
+		//Loop through each neighbours
+		for (auto& connection : *connections) {
+			const Node* endNode = connection.getEndNodeC();
+			int endNodeCost = current->costSoFar + 1;
+
+			std::vector<NodeItem*>::iterator connectionRecordClose = std::find_if(closedList.begin(), closedList.end(), [&connection](NodeItem* ni) -> bool {
+				return (*ni->ptr == *connection.getEndNodeC());
+			});
+			std::vector<NodeItem*>::iterator connectionRecordOpen = std::find_if(openList.begin(), openList.end(), [&connection](NodeItem* ni) -> bool {
+				return (*ni->ptr == *connection.getEndNodeC());
+			});
+			//If the node is closed we have to skip
+			if (connectionRecordClose != closedList.end()) {
+				continue;
+			}
+			else if(connectionRecordOpen != openList.end()) {
+				connectionRecord = *connectionRecordOpen;
+				//if we didn't find a shorter route, skip
+				if (connectionRecord->costSoFar <= endNodeCost)
+					continue;
+			}
+			else {
+				connectionRecord->ptr = connection.getEndNode();
+			}
+
+			connectionRecord->previous = current;
+			connectionRecord->connector = &connection;
+			connectionRecord->costSoFar = endNodeCost;
+			connectionRecord->estimatedTotalCost = endNodeCost;
+			//Add it to the open list
+			if (connectionRecordOpen == openList.end()) {
+				openList.push(connectionRecord);
+			}
+		}
+
+		closedList.push_back(current);
+	}
+
+	vector<const Connector*> path;
+	if (current->ptr->getType() != Tile::ETileType::TileAttribute_Unknown)
+		throw NoPathFound{};
+	else {
+		while (*current->ptr != *start) {
+			path.push_back(current->connector);
+			current = current->previous;
+		}
+	}
+
+	//We liberate all the memory
+	std::for_each(closedList.begin(), closedList.end(), [](NodeItem* ni) {
+		ni->previous = nullptr;
+		delete(ni);
+	});
+	std::for_each(openList.begin(), openList.end(), [](NodeItem* ni) {
+		ni->previous = nullptr;
+		delete(ni);
+	});
+	return path;
 }
 

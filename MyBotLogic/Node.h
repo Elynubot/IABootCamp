@@ -14,7 +14,8 @@ private:
 	int id;
 	Tile::ETileType type;
 	std::vector<Connector> connectors; //Only connectors without any forbidden type on both end are stored
-	
+
+
 public:
 	Node() = default;
 	Node(const TileInfo& tileInfo, int colCount) noexcept;

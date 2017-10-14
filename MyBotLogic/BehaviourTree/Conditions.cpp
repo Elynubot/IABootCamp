@@ -12,12 +12,12 @@ Task::Result IsGoalReached::execute(Agent * ag)
 
 Task::Result IsPathValid::execute(Agent * ag)
 {
-	for(auto& connector : ag->getPath()) {
-		if (connector = nullptr) {
-			return this->FAILURE;
-		}
+	if (ag->getPathValid()) {
+		return this->SUCCESS;
 	}
-	return this->SUCCESS;
+	else {
+		return this->FAILURE;
+	}
 }
 
 Task::Result IsNewPathNeeded::execute(Agent *)

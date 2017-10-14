@@ -5,7 +5,7 @@ Node::Node(const TileInfo& tileInfo, int colCount) noexcept
 	: x{}
 	, y{ (int)tileInfo.tileID / colCount  }
 	, id{ (int)tileInfo.tileID }
-	, type{ tileInfo.tileType }
+	, type{ Tile::ETileType::TileAttribute_Unknown }
 	, connectors{}
 {
 	x = 2*(static_cast<int>(tileInfo.tileID) % colCount) + y % 2;

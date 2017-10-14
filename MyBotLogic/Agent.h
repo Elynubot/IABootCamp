@@ -17,6 +17,8 @@ private:
 	vector<const Connector *> path;
 	State * currState;
 
+	bool pathValid;
+
 public:
 	int getWaited() {
 		return nbTurnPassed;
@@ -39,6 +41,14 @@ public:
 	void setPos(int nPos) {
 		pos = nPos;
 	}
+
+	void setPathValid(bool nPathValid) {
+		pathValid = nPathValid;
+	}
+	bool getPathValid() {
+		return pathValid;
+	}
+
 	void setPath(vector<const Connector *>& nPath) {
 		path = nPath;
 	}
