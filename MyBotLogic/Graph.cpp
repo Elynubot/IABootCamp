@@ -65,6 +65,7 @@ void Graph::update(const map<unsigned int, TileInfo>& tiles) noexcept {
 			});
 		}
 		else if ((node.getType() != Tile::TileAttribute_Forbidden) && (tile.second.tileType == Tile::TileAttribute_Forbidden)) {
+			node.setType(tiles.find(node.getId())->second.tileType);
 			//Pop old connectors for the neighbours of the node
 			vector<Connector>* connectors{ node.getConnectors() };
 			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
