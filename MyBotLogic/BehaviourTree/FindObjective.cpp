@@ -36,5 +36,7 @@ Task::Result FindObjective::execute(Agent * agent)
 			}
 		}
 	}
+	agent->setPathValid(true);
+	agent->setSearching(false);
 	return Task::SUCCESS;
 }

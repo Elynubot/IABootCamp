@@ -1,9 +1,10 @@
 #include "Conditions.h"
 #include "../Agent.h"
+#include "../GameManager.h"
 
 Task::Result IsGoalReached::execute(Agent * ag)
 {
-	if (ag->getPos() == ag->getGoal()) {
+	if (!ag->getIsSearching() && ag->getPos() == ag->getGoal()) {
 		return this->SUCCESS;
 	}
 	else {
@@ -13,7 +14,7 @@ Task::Result IsGoalReached::execute(Agent * ag)
 
 Task::Result IsPathValid::execute(Agent * ag)
 {
-	if (ag->getPathValid()) {
+	if (ag->getPathValid() && ag->getPath().size() >0) {
 		return this->SUCCESS;
 	}
 	else {
@@ -21,7 +22,12 @@ Task::Result IsPathValid::execute(Agent * ag)
 	}
 }
 
-Task::Result IsNewPathNeeded::execute(Agent *)
+Task::Result IsNewPathNeeded::execute(Agent * ag)
 {
-	return Result();
+	if (!ag->getPathValid() || ag->getPath().size() == 0 || GameManager::get().isGoalFound()) {
+		return this->SUCCESS;
+	}
+	else {
+		return this->FAILURE;
+	}
 }

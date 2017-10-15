@@ -1,6 +1,7 @@
 #include "Graph.h"
 #include <algorithm>
 #include "Utility.h"
+#include "GameManager.h"
 
 int Graph::getPositionId(int x, int y) const noexcept {
 	if ((x >= 0) && (x < colCount*2) && (y >= 0) && (y < rowCount))
@@ -47,6 +48,9 @@ void Graph::init(int _rowCount, int _colCount, const std::map<unsigned int, Tile
 
 void Graph::updateNodesType(const std::map<unsigned int, TileInfo>& tiles) noexcept {
 	for_each(tiles.begin(), tiles.end(), [&](const std::pair<unsigned int, TileInfo>& tile) {
+		if (tile.second.tileType == Tile::TileAttribute_Goal && nodes[tile.second.tileID].getType() != Tile::TileAttribute_Goal) {
+			GameManager::get().returnObjective(tile.second.tileID);
+		}
 		nodes[tile.second.tileID].setType(tile.second.tileType);
 	});
 }
@@ -320,6 +324,7 @@ vector<const Connector*> Graph::getBestUnkown(int startId) {
 		NodeItem* connectionRecord;
 		//Loop through each neighbours
 		for (auto& connection : *connections) {
+			connectionRecord = new NodeItem();
 			const Node* endNode = connection.getEndNodeC();
 			int endNodeCost = current->costSoFar + 1;
 

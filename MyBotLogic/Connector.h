@@ -29,7 +29,7 @@ public:
 	Tile::ETilePosition getInvertDirection() const noexcept {
 		return (Tile::ETilePosition) ((direction + 3) % 6) ;
 	}
-	bool getIsToDestroy() {
+	bool getIsToDestroy() const{
 		return isToDestroy;
 	}
 	void setIsToDestroy(bool _isToDestroy) {

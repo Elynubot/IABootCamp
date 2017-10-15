@@ -67,9 +67,13 @@ public:
 		}
 #endif // DEBUG
 		availableObjectives.push_back(id);
+		newGoalFound = true;
 	}
 	void goalFound() {
 		newGoalFound = true;
+	}
+	bool isGoalFound() {
+		return newGoalFound;
 	}
 	void start(LevelInfo& _levelInfo);
 	void update(TurnInfo& _turnInfo, std::vector<Action*>& _actionList);

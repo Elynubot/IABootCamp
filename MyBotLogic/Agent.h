@@ -19,6 +19,7 @@ private:
 	State * currState;
 
 	bool pathValid;
+	bool isSearching;
 
 public:
 	int getId() {
@@ -68,4 +69,11 @@ public:
 	void makeDecisions();
 	Action * play(TurnInfo& _turnInfo);
 	void stateChange(TurnInfo& _turnInfo);
+	void checkPath();
+	void setSearching(bool b) {
+		isSearching = b;
+	}
+	bool getIsSearching() {
+		return isSearching;
+	}
 };

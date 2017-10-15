@@ -16,7 +16,7 @@ GoalTree::GoalTree()
 	FindObjective* findObj = new FindObjective();
 	entry.addChild(objSelector);
 	entry.addChild(discover);
-	objSelector->addChild(discover);
+	objSelector->addChild(goalReached);
 	objSelector->addChild(nObjSequence);
 	objSelector->addChild(pathValid);
 	nObjSequence->addChild(newPathNeeded);

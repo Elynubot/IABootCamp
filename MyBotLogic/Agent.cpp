@@ -33,4 +33,13 @@ void Agent::stateChange(TurnInfo& _turnInfo)
 	}
 }
 
+void Agent::checkPath()
+{
+	for (const Connector * con: path) {
+		if (con->getIsToDestroy()) {
+			pathValid = false;
+		}
+	}
+}
+
 

@@ -56,11 +56,15 @@ void GameManager::start(LevelInfo & _levelInfo)
 
 void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList)
 {
+	graph.update(_turnInfo.tiles,_turnInfo.objects);
+	for (Agent * agent : agents) {
+		agent->checkPath();
+	}
+	graph.popInvalidConnectors();
 	for (Agent * agent : agents)
 	{
 		agent->makeDecisions();
 	}
-
 	for (Agent * agent : agents)
 	{
 		agent->stateChange(_turnInfo);
