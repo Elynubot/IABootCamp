@@ -1,14 +1,24 @@
 #include "Conditions.h"
 #include "../Agent.h"
 
-Task::Result IsGoalReached::execute(Agent *)
+Task::Result IsGoalReached::execute(Agent * ag)
 {
-	return Result();
+	if (ag->getPos() == ag->getGoal()) {
+		return this->SUCCESS;
+	}
+	else {
+		return this->FAILURE;
+	}
 }
 
-Task::Result IsPathValid::execute(Agent *)
+Task::Result IsPathValid::execute(Agent * ag)
 {
-	return Result();
+	if (ag->getPathValid()) {
+		return this->SUCCESS;
+	}
+	else {
+		return this->FAILURE;
+	}
 }
 
 Task::Result IsNewPathNeeded::execute(Agent *)

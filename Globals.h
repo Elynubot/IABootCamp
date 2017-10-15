@@ -9,6 +9,7 @@ namespace Tile
 		TileAttribute_Goal,
 		TileAttribute_Forbidden,
 		TileAttribute_Omniscient,
+		TileAttribute_Unknown,
 	};
 }
 

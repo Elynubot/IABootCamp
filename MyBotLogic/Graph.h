@@ -55,6 +55,7 @@ public:
 	}
 	void popInvalidConnectors() noexcept;
 
+	vector<const Connector*> Graph::getBestUnkown(int startId);
 };
 
 

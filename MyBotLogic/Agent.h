@@ -18,6 +18,8 @@ private:
 	vector<int> forbidden;
 	State * currState;
 
+	bool pathValid;
+
 public:
 	int getId() {
 		return id;
@@ -34,6 +36,14 @@ public:
 	void setPos(int nPos) {
 		pos = nPos;
 	}
+
+	void setPathValid(bool nPathValid) {
+		pathValid = nPathValid;
+	}
+	bool getPathValid() {
+		return pathValid;
+	}
+
 	void setPath(vector<const Connector *>& nPath) {
 		path = nPath;
 	}

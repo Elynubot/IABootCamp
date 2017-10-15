@@ -24,7 +24,7 @@ void GameManager::start(LevelInfo & _levelInfo)
 		ag->setPos(npc.second.tileID);
 		agents.push(ag);
 	}
-	vector<int> goals = graph.getGoalPosition();
+	/*vector<int> goals = graph.getGoalPosition();
 	vector<bool> taken;
 	for (int i : goals)
 	{
@@ -51,7 +51,7 @@ void GameManager::start(LevelInfo & _levelInfo)
 	for (Agent * agent : agents)
 	{
 		agent->setPath(graph.getPath(agent->getPos(), agent->getGoal()));
-	}
+	}*/
 }
 
 void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList)
