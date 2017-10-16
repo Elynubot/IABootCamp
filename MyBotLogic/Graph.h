@@ -41,7 +41,6 @@ private:
 	class HeuristicManhattan;
 	struct NodeItem;
 	class NodeItemPtrComparison;
-	class NoPathFound {};
 public:
 	vector<int> getGoalPosition() const noexcept;
 	vector<const Connector*> getPath(int beginId, int goalId);

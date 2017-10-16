@@ -256,7 +256,7 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 
 	//We're here if we've either found the goal, or if we've no more nodes to search, find which.
 	if (*current->ptr != *end)
-		throw NoPathFound{}; //We've run out of nodes without finding the goal, so there's no solution
+		return path; //We've run out of nodes without finding the goal, so there's no solution
 	else {
 		//Work back along the path, accumulating connections
 		while (*current->ptr != *start) {
@@ -363,7 +363,7 @@ vector<const Connector*> Graph::getBestUnkown(int startId) {
 
 	vector<const Connector*> path;
 	if (current->ptr->getType() != Tile::ETileType::TileAttribute_Unknown)
-		throw NoPathFound{};
+		return path;
 	else {
 		while (*current->ptr != *start) {
 			path.push_back(current->connector);

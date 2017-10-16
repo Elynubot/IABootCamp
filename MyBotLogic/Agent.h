@@ -59,7 +59,7 @@ public:
 			return pos;
 		}
 	}
-	const vector<int>& getForbiddens() {
+	vector<int>& getForbiddens() {
 		return forbidden;
 	}
 	void addForbidden(int id) {
