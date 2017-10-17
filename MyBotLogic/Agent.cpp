@@ -7,6 +7,7 @@ Agent::Agent(int agentId)
 {
 	id = agentId;
 	currState = &LogicManager::get().getMoveState();
+	isSearching = true;
 }
 
 void Agent::makeDecisions()
