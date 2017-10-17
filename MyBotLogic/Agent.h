@@ -19,7 +19,7 @@ private:
 	State * currState;
 
 	bool pathValid;
-	bool isSearching;
+	bool isSearching = true;
 
 public:
 	int getId() {
