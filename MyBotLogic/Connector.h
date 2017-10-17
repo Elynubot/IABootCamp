@@ -10,7 +10,7 @@ private:
 	Tile::ETilePosition direction;
 	bool isToDestroy;
 public:
-	Connector(Node * begin, Node * end, Tile::ETilePosition direction);
+	void init(Node * begin, Node * end, Tile::ETilePosition direction);
 	const Node * getBeginNodeC() const noexcept {
 		return beginNode;
 	}

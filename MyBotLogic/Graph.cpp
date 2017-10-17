@@ -9,10 +9,12 @@ int Graph::getPositionId(int x, int y) const noexcept {
 	return -1;
 }
 
-void Graph::tryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) noexcept {
+void Graph::tryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y, int& index) noexcept {
 	int i = getPositionId(x, y);
 	if (i != -1) {
-		node.addConnector(dir, &nodes[i]);
+		connectors[index].init(&node, &nodes[i], dir);
+		node.addConnector(&connectors[index]);
+		++index;
 	}
 }
 
@@ -23,17 +25,25 @@ void Graph::createNodes() noexcept {
 	}
 }
 
-//Create the connectors for each accessible neighbours for each node
+//Create all connectors empty
 void Graph::createConnectors() noexcept {
+	for (int i = 0; i < (((rowCount * (colCount - 1)) + ((2 * colCount - 1)*(rowCount - 1)))) * 2; ++i) {
+		connectors.push_back(Connector{});
+	}
+}
+
+//Create the connectors for each accessible neighbours for each node
+void Graph::initConnectors() noexcept {
+	int i{};
 	for_each(nodes.begin(), nodes.end(), [&](Node& node) {
 		int x{ node.getX() };
 		int y{ node.getY() };
-		tryAddConnector(node, Tile::NW, x - 1, y - 1);
-		tryAddConnector(node, Tile::NE, x + 1, y - 1);
-		tryAddConnector(node, Tile::W, x - 2, y);
-		tryAddConnector(node, Tile::E, x + 2, y);
-		tryAddConnector(node, Tile::SW, x - 1, y + 1);
-		tryAddConnector(node, Tile::SE, x + 1, y + 1);
+		tryAddConnector(node, Tile::NW, x - 1, y - 1, i);
+		tryAddConnector(node, Tile::NE, x + 1, y - 1, i);
+		tryAddConnector(node, Tile::W, x - 2, y, i);
+		tryAddConnector(node, Tile::E, x + 2, y, i);
+		tryAddConnector(node, Tile::SW, x - 1, y + 1, i);
+		tryAddConnector(node, Tile::SE, x + 1, y + 1, i);
 	});
 }
 
@@ -42,6 +52,7 @@ void Graph::init(int _rowCount, int _colCount, const std::map<unsigned int, Tile
 	colCount = _colCount;
 	createNodes();
 	createConnectors();
+	initConnectors();
 	update(tiles, objects);
 	popInvalidConnectors();
 }
@@ -59,23 +70,23 @@ void Graph::updateConnectorsWithType(const std::map<unsigned int, TileInfo>& til
 	for_each(tiles.begin(), tiles.end(), [&](const std::pair<unsigned int, TileInfo>& tile) {
 		Node& node = nodes[tile.second.tileID];
 		if (node.getType() == Tile::TileAttribute_Forbidden) {
-			vector<Connector>* connectors{ node.getConnectors() };
-			for_each(connectors->begin(), connectors->end(), [&](Connector& connector) {
-				Connector* c1 = connector.getEndNode()->getConnector(connector.getBeginNode());
+			vector<Connector*>* connectors{ node.getConnectors() };
+			for_each(connectors->begin(), connectors->end(), [&](Connector* connector) {
+				Connector* c1 = connector->getEndNode()->getConnector(connector->getBeginNode());
 				if (c1 != nullptr) {
 					c1->setIsToDestroy(true);
-					invalidConnectors.push_back(Connector{ *c1 });
+					invalidConnectors.push_back(c1);
 				}
-				connector.setIsToDestroy(true);
-				invalidConnectors.push_back(Connector{ connector });
+				connector->setIsToDestroy(true);
+				invalidConnectors.push_back(connector);
 			});
 		}
 		else if ((node.getType() != Tile::TileAttribute_Forbidden) && (tile.second.tileType == Tile::TileAttribute_Forbidden)) {
 			node.setType(tiles.find(node.getId())->second.tileType);
 			//Pop old connectors for the neighbours of the node
-			vector<Connector>* connectors{ node.getConnectors() };
-			for_each(connectors->begin(), connectors->end(), [](Connector& connector) {
-				connector.getEndNode()->popConnector(connector.getBeginNode());
+			vector<Connector*>* connectors{ node.getConnectors() };
+			for_each(connectors->begin(), connectors->end(), [](Connector* connector) {
+				connector->getEndNode()->popConnector(connector->getBeginNode());
 			});
 			//Clear connectors for the node
 			node.clearConnectors();
@@ -90,11 +101,11 @@ void Graph::updateConnectorsWithObjects(const std::map<unsigned int, ObjectInfo>
 			Connector* c1 = nodes[object.second.tileID].getConnector(object.second.position);
 			if ((c1 != nullptr) && (c1->getIsToDestroy() == false)) {
 				c1->setIsToDestroy(true);
-				invalidConnectors.push_back(Connector{ *c1 });
+				invalidConnectors.push_back(c1);
 				Connector* c2 = c1->getEndNode()->getConnector(c1->getBeginNode());
 				if ((c2 != nullptr) && (c2->getIsToDestroy() == false)) {
 					c2->setIsToDestroy(true);
-					invalidConnectors.push_back(Connector{ *c2 });
+					invalidConnectors.push_back(c2);
 				}
 			}
 		}
@@ -171,13 +182,13 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 		}
 
 		//Otherwise get its outgoing connections
-		vector<Connector>* neighbours = current->ptr->getConnectors();
+		vector<Connector*>* neighbours = current->ptr->getConnectors();
 
 		//Loop through each neighbours
 		for (auto& neighbour : *neighbours) {
 
 			//Get the cost estimate for the neighbourNode
-			const Node* neighbourNode = neighbour.getEndNodeC();
+			const Node* neighbourNode = neighbour->getEndNodeC();
 			int neighbourNodeCost = current->costSoFar + 1;
 
 			NodeItem* neighbourRecord = new NodeItem();
@@ -185,12 +196,12 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 
 			//Here we find the record in the open list corresponding to the neighbourNode if it exist
 			std::vector<NodeItem*>::iterator neighbourRecordOpen = std::find_if(openList.begin(), openList.end(), [&neighbour](NodeItem* ni) ->bool {
-				return (*ni->ptr == *neighbour.getEndNodeC());
+				return (*ni->ptr == *neighbour->getEndNodeC());
 			});
 
 			//Here we find the record in the closed list corresponding to the neighbourNode if it exist
 			std::vector<NodeItem*>::iterator neighbourRecordClose = std::find_if(closedList.begin(), closedList.end(), [&neighbour](NodeItem* ni) -> bool {
-				return (*ni->ptr == *neighbour.getEndNodeC());
+				return (*ni->ptr == *neighbour->getEndNodeC());
 			});
 
 			//If the node is closed we may have to skip, or remove it from the closed list
@@ -222,23 +233,24 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 
 							  //We can use the node's old cost values to calculate its heuristic 
 							  //without calling the possibly expensive heuristic function
-				neighbourNodeHeuristic = neighbourRecord->estimatedTotalCost - neighbourRecord->costSoFar;
+				//neighbourNodeHeuristic = neighbourRecord->estimatedTotalCost - neighbourRecord->costSoFar; //COMMENTE A FIN DE DEBUG UNIQUEMENT
 			}
 
 			//Otherwise we know we've got an unvisited node, so make a record for it
 			else {
-				neighbourRecord->ptr = neighbour.getEndNode();
+				neighbourRecord->ptr = neighbour->getEndNode();
 
 				//We'll need to calculate the heuristic value using the function, since we don't have an existing record to use
 				neighbourNodeHeuristic = heuristic(neighbourRecord->ptr);
+				neighbourRecord->estimatedTotalCost = neighbourNodeCost + neighbourNodeHeuristic; // A ENLEVER
 			}
 
 			//We're here if we need to update the node
 			//Update the cost, estimate and connection
 			neighbourRecord->previous = current;
-			neighbourRecord->connector = &neighbour;
+			neighbourRecord->connector = neighbour;
 			neighbourRecord->costSoFar = neighbourNodeCost;
-			neighbourRecord->estimatedTotalCost = neighbourNodeCost + neighbourNodeHeuristic;
+			//neighbourRecord->estimatedTotalCost = neighbourNodeCost + neighbourNodeHeuristic; TEST
 
 			//And add it to the open list
 			if (neighbourRecordOpen == openList.end()) {
@@ -290,8 +302,8 @@ vector<int> Graph::getGoalPosition() const noexcept
 }
 
 void Graph::popInvalidConnectors() noexcept {
-	for_each(invalidConnectors.begin(), invalidConnectors.end(), [&](Connector connector) {
-		connector.getBeginNode()->popConnector(connector.getEndNode());
+	for_each(invalidConnectors.begin(), invalidConnectors.end(), [&](Connector* connector) {
+		connector->getBeginNode()->popConnector(connector->getEndNode());
 	});
 	invalidConnectors.clear();
 }
@@ -320,19 +332,19 @@ vector<const Connector*> Graph::getBestUnkown(int startId) {
 			break;
 		}
 
-		vector<Connector>* connections = current->ptr->getConnectors();
+		vector<Connector*>* connections = current->ptr->getConnectors();
 		NodeItem* connectionRecord;
 		//Loop through each neighbours
 		for (auto& connection : *connections) {
 			connectionRecord = new NodeItem();
-			const Node* endNode = connection.getEndNodeC();
+			const Node* endNode = connection->getEndNodeC();
 			int endNodeCost = current->costSoFar + 1;
 
 			std::vector<NodeItem*>::iterator connectionRecordClose = std::find_if(closedList.begin(), closedList.end(), [&connection](NodeItem* ni) -> bool {
-				return (*ni->ptr == *connection.getEndNodeC());
+				return (*ni->ptr == *connection->getEndNodeC());
 			});
 			std::vector<NodeItem*>::iterator connectionRecordOpen = std::find_if(openList.begin(), openList.end(), [&connection](NodeItem* ni) -> bool {
-				return (*ni->ptr == *connection.getEndNodeC());
+				return (*ni->ptr == *connection->getEndNodeC());
 			});
 			//If the node is closed we have to skip
 			if (connectionRecordClose != closedList.end()) {
@@ -345,11 +357,11 @@ vector<const Connector*> Graph::getBestUnkown(int startId) {
 					continue;
 			}
 			else {
-				connectionRecord->ptr = connection.getEndNode();
+				connectionRecord->ptr = connection->getEndNode();
 			}
 
 			connectionRecord->previous = current;
-			connectionRecord->connector = &connection;
+			connectionRecord->connector = connection;
 			connectionRecord->costSoFar = endNodeCost;
 			connectionRecord->estimatedTotalCost = endNodeCost;
 			//Add it to the open list

@@ -5,8 +5,11 @@
 Task::Result FindObjective::execute(Agent * agent)
 {
 	GameManager& gm = GameManager::get();
-	vector<int> objectives = gm.getAvailableObjectives();
 	vector<int>& forbiddens = agent->getForbiddens();
+	if (!agent->getIsSearching()) {
+		gm.returnObjective(agent->getGoal());
+	}
+	vector<int> objectives = gm.getAvailableObjectives();
 	bool found = false;
 	while (!found) {
 		int minDist = -1;

@@ -12,7 +12,9 @@ private:
 	int rowCount;
 	int colCount;
 	vector<Node> nodes;
-	vector<Connector> invalidConnectors;
+	vector<Connector> connectors;
+
+	vector<Connector*> invalidConnectors;
 private:
 	Node& getNode(int id) noexcept {
 		return nodes[id];
@@ -20,12 +22,15 @@ private:
 	int getPositionId(int x, int y) const noexcept; 
 
 	//Try to add to the node the connector based on the dir and the x/y of the obj node
-	void tryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y) noexcept;
+	void tryAddConnector(Node& node, Tile::ETilePosition dir, int x, int y, int& i) noexcept;
 
 	//Create the nodes without their connectors with the Node constructor
 	void createNodes() noexcept;
-	//Create the connectors for each accessible neighbours for each node
+	//Create all connectors empty
 	void createConnectors() noexcept;
+
+	//Init the connectors for each accessible neighbours for each node
+	void initConnectors() noexcept;
 	//Update nodes
 	void updateNodesType(const std::map<unsigned int, TileInfo>& tiles) noexcept;
 	//Update connectors
@@ -49,7 +54,7 @@ public:
 		const Node* node2{ &nodes[n2] };
 		return (abs(node1->getX() - node2->getX()) + abs(node1->getY() - node2->getY()));
 	}
-	const vector<Connector>& getInvalidConnectors() const noexcept {
+	const vector<Connector*>& getInvalidConnectors() const noexcept {
 		return invalidConnectors;
 	}
 	void popInvalidConnectors() noexcept;

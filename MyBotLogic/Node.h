@@ -13,7 +13,7 @@ private:
 
 	int id;
 	Tile::ETileType type;
-	std::vector<Connector> connectors; //Only connectors without any forbidden type on both end are stored
+	std::vector<Connector*> connectors; //Only connectors without any forbidden type on both end are stored
 
 
 public:
@@ -38,7 +38,7 @@ public:
 		type = _type;
 	}
 
-	std::vector<Connector>* getConnectors() noexcept {
+	std::vector<Connector*>* getConnectors() noexcept {
 		return &connectors;
 	}
 	void clearConnectors() noexcept {
@@ -48,7 +48,7 @@ public:
 		return getType() == Tile::TileAttribute_Goal;
 	}
 
-	void addConnector(Tile::ETilePosition dir, Node * obj) noexcept;
+	void addConnector(Connector* connector) noexcept;
 	void popConnector(Node * obj) noexcept;
 	Connector* getConnector(Node * obj) noexcept;
 	Connector* getConnector(Tile::ETilePosition dir) noexcept;
