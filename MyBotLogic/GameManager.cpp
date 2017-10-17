@@ -17,18 +17,14 @@ GameManager::~GameManager()
 
 void GameManager::start(LevelInfo & _levelInfo)
 {
-	/*bool debug = true;
-	while (debug) {
-		Sleep(1000);
-	}*/
 	graph.init(_levelInfo.rowCount, _levelInfo.colCount, _levelInfo.tiles, _levelInfo.objects);
 	for (const auto& npc : _levelInfo.npcs)
 	{
-		Agent * ag = new Agent(npc.second.npcID);
+		Agent * ag = new Agent((int)npc.second.npcID );
 		ag->setPos(npc.second.tileID);
 		agents.push(ag);
 	}
-	vector<int> goals = graph.getGoalPosition();
+	/*vector<int> goals = graph.getGoalPosition();
 	vector<bool> taken;
 	for (int i : goals)
 	{
@@ -55,16 +51,28 @@ void GameManager::start(LevelInfo & _levelInfo)
 	for (Agent * agent : agents)
 	{
 		agent->setPath(graph.getPath(agent->getPos(), agent->getGoal()));
-	}
+	}*/
 }
 
 void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList)
 {
+	graph.update(_turnInfo.tiles,_turnInfo.objects);
+	for (Agent * agent : agents) {
+		agent->checkPath();
+	}
+	graph.popInvalidConnectors();
+	for (Agent * agent : agents)
+	{
+		agent->makeDecisions();
+	}
+	for (Agent * agent : agents)
+	{
+		agent->stateChange(_turnInfo);
+	}
 
-	for_each(agents.begin(), agents.end(), [&_turnInfo](Agent * agent) {
-		agent->stateChange(_turnInfo); 
-	});
-	for_each(agents.begin(), agents.end(), [&_turnInfo, &_actionList](Agent * agent) {
-		_actionList.push_back(agent->Play(_turnInfo));
-	});
+	for (Agent * agent : agents)
+	{
+		_actionList.push_back(agent->play(_turnInfo));
+	}
+	newGoalFound = false;
 }

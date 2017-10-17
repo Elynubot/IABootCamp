@@ -1,4 +1,5 @@
 #include "Selector.h"
+#include "../Agent.h"
 
 Task::Result Selector::execute(Agent * ag)
 {

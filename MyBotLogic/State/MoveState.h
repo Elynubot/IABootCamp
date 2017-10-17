@@ -5,11 +5,8 @@
 using namespace std;
 
 class MoveState : public State {
-private:
-	static MoveState instance;
-	MoveState();
 public:
-	static State * get();
+	MoveState();
 
 	State * getTransition(TurnInfo& _turnInfo, Agent * agent);
 	void onEnter(Agent * agent);

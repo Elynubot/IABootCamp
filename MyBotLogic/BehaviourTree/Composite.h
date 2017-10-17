@@ -1,11 +1,12 @@
 #pragma once
 #include "Task.h"
 #include <memory>
+#include <vector>
 
 class Composite : public Task {
 public:
-	void addChild(std::unique_ptr<Task>);
+	void addChild(Task*);
 
 protected:
-	std::vector<std::unique_ptr<Task>> children;
+	std::vector<Task*> children;
 };

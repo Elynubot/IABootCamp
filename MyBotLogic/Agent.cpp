@@ -1,14 +1,21 @@
 #include "Agent.h"
 #include "State/MoveState.h"
 #include "State/WaitState.h"
+#include "LogicManager.h"
 
 Agent::Agent(int agentId)
 {
 	id = agentId;
-	currState = MoveState::get();
+	currState = &LogicManager::get().getMoveState();
+	isSearching = true;
 }
 
-Action * Agent::Play(TurnInfo& _turnInfo)
+void Agent::makeDecisions()
+{
+	LogicManager::get().getDecisionTree().execute(this);
+}
+
+Action * Agent::play(TurnInfo& _turnInfo)
 {
 	return currState->onUpdate(_turnInfo, this);
 }
@@ -24,6 +31,15 @@ void Agent::stateChange(TurnInfo& _turnInfo)
 		currState->onEnter(this);
 		count--;
 		trans = currState->getTransition(_turnInfo, this);
+	}
+}
+
+void Agent::checkPath()
+{
+	for (const Connector * con: path) {
+		if (con->getIsToDestroy()) {
+			pathValid = false;
+		}
 	}
 }
 
