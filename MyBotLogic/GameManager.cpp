@@ -22,7 +22,7 @@ void GameManager::start(LevelInfo & _levelInfo)
 	{
 		Agent * ag = new Agent((int)npc.second.npcID );
 		ag->setPos(npc.second.tileID);
-		agents.push(ag);
+		agents.push_back(ag);
 	}
 	/*vector<int> goals = graph.getGoalPosition();
 	vector<bool> taken;
@@ -61,6 +61,9 @@ void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList
 		agent->checkPath();
 	}
 	graph.popInvalidConnectors();
+
+	sort(agents.begin(), agents.end(), AgentPtrComparison());
+
 	for (Agent * agent : agents)
 	{
 		agent->makeDecisions();
@@ -69,7 +72,6 @@ void GameManager::update(TurnInfo & _turnInfo, std::vector<Action*>& _actionList
 	{
 		agent->stateChange(_turnInfo);
 	}
-
 	for (Agent * agent : agents)
 	{
 		_actionList.push_back(agent->play(_turnInfo));

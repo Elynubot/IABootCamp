@@ -30,7 +30,8 @@ private:
 		}
 	};
 
-	MyPriorityQueue<Agent*, std::vector<Agent*>, GameManager::AgentPtrComparison> agents;
+	vector<Agent*> agents;
+
 
 	GameManager();
 	GameManager(GameManager&) = delete;

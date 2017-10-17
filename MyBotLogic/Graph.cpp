@@ -167,15 +167,22 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 
 	//Initialize the open and the closed list
 	vector<NodeItem*> closedList;
-	MyPriorityQueue<NodeItem*, std::vector<NodeItem*>, NodeItemPtrComparison> openList;
+	map<NodeItem*, int> openList;
+	//MyPriorityQueue<NodeItem*, std::vector<NodeItem*>, NodeItemPtrComparison> openList;
 
-	openList.push(startRecord);
+	//openList.push(startRecord);
+	openList.insert(make_pair( startRecord, startRecord->estimatedTotalCost ));
 	NodeItem* current;
 	//Iterate through processing each node
 	while (openList.size() > 0) {
 		//Find the smallest element in the open list
-		current = openList.top();
-		openList.pop();
+		auto min = min_element(openList.begin(), openList.end(), [](pair<NodeItem*, int> left, pair<NodeItem*, int> right) -> bool
+		{
+			return (left.second < right.second);
+		});
+		current = min->first;
+		openList.erase(min->first);
+
 		//If it is the goal node, then terminate
 		if (*current->ptr == *end) {
 			break;
@@ -195,8 +202,8 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 			int neighbourNodeHeuristic;
 
 			//Here we find the record in the open list corresponding to the neighbourNode if it exist
-			std::vector<NodeItem*>::iterator neighbourRecordOpen = std::find_if(openList.begin(), openList.end(), [&neighbour](NodeItem* ni) ->bool {
-				return (*ni->ptr == *neighbour->getEndNodeC());
+			auto neighbourRecordOpen = find_if(openList.begin(), openList.end(), [&neighbour](pair<NodeItem*, int> p) ->bool {
+				return (*p.first->ptr == *neighbour->getEndNodeC());
 			});
 
 			//Here we find the record in the closed list corresponding to the neighbourNode if it exist
@@ -214,7 +221,7 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 				if (neighbourRecord->costSoFar <= neighbourNodeCost)
 					continue; //jump to the end of the loop
 
-							  //otherwise remove it from the closed list
+				//otherwise remove it from the closed list
 				closedList.erase(neighbourRecordClose);
 
 				//we can use the node's old cost values to calculate its heuristic 
@@ -226,14 +233,15 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 			else if 
 				(neighbourRecordOpen != openList.end()) {
 				
-				neighbourRecord = *neighbourRecordOpen;
+				neighbourRecord = neighbourRecordOpen->first;
 				//If our route is no better, then skip
 				if (neighbourRecord->costSoFar <= neighbourNodeCost)
 					continue; //jump to the end of the looop
 
 							  //We can use the node's old cost values to calculate its heuristic 
 							  //without calling the possibly expensive heuristic function
-				//neighbourNodeHeuristic = neighbourRecord->estimatedTotalCost - neighbourRecord->costSoFar; //COMMENTE A FIN DE DEBUG UNIQUEMENT
+
+				neighbourNodeHeuristic = neighbourRecord->estimatedTotalCost - neighbourRecord->costSoFar;
 			}
 
 			//Otherwise we know we've got an unvisited node, so make a record for it
@@ -242,6 +250,8 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 
 				//We'll need to calculate the heuristic value using the function, since we don't have an existing record to use
 				neighbourNodeHeuristic = heuristic(neighbourRecord->ptr);
+
+				//TO DO
 				neighbourRecord->estimatedTotalCost = neighbourNodeCost + neighbourNodeHeuristic; // A ENLEVER
 			}
 
@@ -250,11 +260,13 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 			neighbourRecord->previous = current;
 			neighbourRecord->connector = neighbour;
 			neighbourRecord->costSoFar = neighbourNodeCost;
+
+			//TO DO
 			//neighbourRecord->estimatedTotalCost = neighbourNodeCost + neighbourNodeHeuristic; TEST
 
 			//And add it to the open list
 			if (neighbourRecordOpen == openList.end()) {
-				openList.push(neighbourRecord);
+				openList.insert(make_pair(neighbourRecord, neighbourRecord->estimatedTotalCost));
 			}
 		}
 
@@ -283,9 +295,9 @@ vector<const Connector*> Graph::getPath(int startId, int goalId) {
 		delete(ni);
 	});
 
-	std::for_each(openList.begin(), openList.end(), [](NodeItem* ni) {
-		ni->previous = nullptr;
-		delete(ni);
+	std::for_each(openList.begin(), openList.end(), [](pair<NodeItem*, int> p) {
+		p.first->previous = nullptr;
+		delete(p.first);
 	});
 
 	return path;
