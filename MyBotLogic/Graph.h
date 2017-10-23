@@ -13,7 +13,6 @@ private:
 	int colCount;
 	vector<Node> nodes;
 	vector<Connector> connectors;
-
 	vector<Connector*> invalidConnectors;
 private:
 	Node& getNode(int id) noexcept {
@@ -31,9 +30,9 @@ private:
 
 	//Init the connectors for each accessible neighbours for each node
 	void initConnectors() noexcept;
-	//Update nodes
+	//Update nodes type
 	void updateNodesType(const std::map<unsigned int, TileInfo>& tiles) noexcept;
-	//Update connectors
+	//Update connectors and delete unaccessible connectors
 	void updateConnectorsWithType(const std::map<unsigned int, TileInfo>& tiles) noexcept;
 	void updateConnectorsWithObjects(const std::map<unsigned int, ObjectInfo>& objects) noexcept;
 public:
@@ -48,7 +47,6 @@ private:
 	class NodeItemPtrComparison;
 public:
 	vector<int> getGoalPosition() const noexcept;
-	vector<const Connector*> getPath(int beginId, int goalId);
 	int dist(int n1, int n2) const noexcept {
 		const Node* node1{ &nodes[n1] };
 		const Node* node2{ &nodes[n2] };
@@ -59,7 +57,8 @@ public:
 	}
 	void popInvalidConnectors() noexcept;
 
-	vector<const Connector*> Graph::getBestUnkown(int startId);
+	vector<const Connector*> getPath(int beginId, int goalId);
+	vector<const Connector*> getBestUnkown(int startId);
 };
 
 
